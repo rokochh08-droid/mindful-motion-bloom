@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Layout } from "@/components/layout/Layout";
+import { CSVImport } from "@/components/ai-coach/CSVImport";
 import { 
   Brain, 
   Send, 
@@ -12,7 +13,8 @@ import {
   TrendingUp, 
   Target,
   MessageCircle,
-  Lightbulb
+  Lightbulb,
+  Settings
 } from "lucide-react";
 
 interface Message {
@@ -29,6 +31,14 @@ interface Insight {
   color: string;
 }
 
+interface TrainingData {
+  category: string;
+  userMessage: string;
+  aiResponse: string;
+  context: string;
+  quality: number;
+}
+
 export default function AICoach() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -39,6 +49,7 @@ export default function AICoach() {
     }
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const insights: Insight[] = [
@@ -100,7 +111,51 @@ export default function AICoach() {
     }, 1000);
   };
 
+  const findBestTrainingResponse = (userInput: string): string | null => {
+    const trainingData: TrainingData[] = JSON.parse(localStorage.getItem('aiCoachTrainingData') || '[]');
+    
+    if (trainingData.length === 0) return null;
+    
+    const input = userInput.toLowerCase();
+    
+    // Find the best matching training response
+    let bestMatch: TrainingData | null = null;
+    let bestScore = 0;
+    
+    for (const item of trainingData) {
+      const userMessage = item.userMessage.toLowerCase();
+      const context = item.context.toLowerCase();
+      
+      // Simple keyword matching score
+      let score = 0;
+      const inputWords = input.split(' ').filter(word => word.length > 2);
+      
+      for (const word of inputWords) {
+        if (userMessage.includes(word)) score += 3;
+        if (context.includes(word)) score += 1;
+      }
+      
+      // Boost score for quality
+      score = score * (item.quality / 5);
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = item;
+      }
+    }
+    
+    // Return training response if we found a good match (score > 3)
+    return bestScore > 3 ? bestMatch?.aiResponse || null : null;
+  };
+
   const generateCoachResponse = (userInput: string): string => {
+    // First, try to find a matching response from training data
+    const trainingResponse = findBestTrainingResponse(userInput);
+    if (trainingResponse) {
+      return trainingResponse;
+    }
+    
+    // Fall back to default responses
     const input = userInput.toLowerCase();
     
     if (input.includes('tired') || input.includes('exhausted')) {
@@ -130,15 +185,32 @@ export default function AICoach() {
     <Layout>
       <div className="flex flex-col h-screen">
         <div className="p-4 border-b border-border">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-              <Brain className="w-6 h-6 text-primary-foreground" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                <Brain className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">AI Fitness Coach</h1>
+                <p className="text-sm text-muted-foreground">Your supportive training companion</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">AI Fitness Coach</h1>
-              <p className="text-sm text-muted-foreground">Your supportive training companion</p>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
           </div>
+          
+          {showSettings && (
+            <div className="mt-4 p-4 bg-card border rounded-lg">
+              <CSVImport onDataImported={() => {
+                // Optionally refresh insights or show success message
+              }} />
+            </div>
+          )}
         </div>
 
         {/* Insights Cards */}
