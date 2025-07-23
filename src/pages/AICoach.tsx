@@ -174,13 +174,12 @@ export default function AICoach() {
     
     // Return training response if we found a good match (score > 3)
     if (bestScore > 3 && bestMatch) {
-      // Combine aiResponse and context for complete response
-      const fullResponse = bestMatch.context 
-        ? `${bestMatch.aiResponse} ${bestMatch.context}`
-        : bestMatch.aiResponse;
       console.log('Best match score:', bestScore);
-      console.log('Complete response:', fullResponse);
-      return fullResponse;
+      console.log('Best match user message:', bestMatch.userMessage);
+      console.log('Best match AI response:', bestMatch.aiResponse);
+      console.log('Best match context:', bestMatch.context);
+      console.log('AI response length:', bestMatch.aiResponse.length);
+      return bestMatch.aiResponse; // Return just the AI response, not combined with context
     }
     return null;
   };
