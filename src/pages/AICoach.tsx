@@ -117,9 +117,16 @@ export default function AICoach() {
     const localTrainingData: TrainingData[] = JSON.parse(localStorage.getItem('aiCoachTrainingData') || '[]');
     
     // Then fetch from Supabase database for Google Sheets imported data
-    const { data: dbTrainingData } = await supabase
+    const { data: dbTrainingData, error } = await supabase
       .from('ai_training_data')
       .select('*');
+    
+    if (error) {
+      console.error('Error fetching training data:', error);
+    }
+    
+    console.log('Local training data count:', localTrainingData.length);
+    console.log('Database training data count:', dbTrainingData?.length || 0);
     
     // Combine both sources
     const allTrainingData = [
@@ -132,6 +139,8 @@ export default function AICoach() {
         quality: item.quality
       }))
     ];
+    
+    console.log('Total training data count:', allTrainingData.length);
     
     if (allTrainingData.length === 0) return null;
     
@@ -164,7 +173,11 @@ export default function AICoach() {
     }
     
     // Return training response if we found a good match (score > 3)
-    return bestScore > 3 ? bestMatch?.aiResponse || null : null;
+    const result = bestScore > 3 ? bestMatch?.aiResponse || null : null;
+    console.log('Best match score:', bestScore);
+    console.log('Best match response:', result);
+    console.log('Full best match:', bestMatch);
+    return result;
   };
 
   const generateCoachResponse = async (userInput: string): Promise<string> => {
