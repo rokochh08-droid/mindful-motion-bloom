@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, Database, CheckCircle, XCircle } from "lucide-react";
+import { Upload, Database, CheckCircle, XCircle, Link } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrainingData {
   category: string;
@@ -19,6 +23,7 @@ interface CSVImportProps {
 export const CSVImport = ({ onDataImported }: CSVImportProps) => {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sheetsUrl, setSheetsUrl] = useState("");
   const [importStats, setImportStats] = useState<{
     total: number;
     successful: number;
@@ -151,6 +156,56 @@ export const CSVImport = ({ onDataImported }: CSVImportProps) => {
     return data.length;
   };
 
+  const handleGoogleSheetsImport = async () => {
+    if (!sheetsUrl.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a Google Sheets URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('import-google-sheets', {
+        body: { sheetsUrl: sheetsUrl.trim() }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        setImportStats({
+          total: data.count,
+          successful: data.count,
+          errors: 0
+        });
+
+        toast({
+          title: "Import Successful",
+          description: data.message,
+        });
+
+        setSheetsUrl("");
+        onDataImported?.([]);
+      } else {
+        throw new Error(data.error || 'Import failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: error.message || "Failed to import from Google Sheets",
+        variant: "destructive",
+      });
+      console.error('Google Sheets import error:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const clearTrainingData = () => {
     localStorage.removeItem('aiCoachTrainingData');
     setImportStats(null);
@@ -170,45 +225,77 @@ export const CSVImport = ({ onDataImported }: CSVImportProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          <p>Import CSV with columns: Category, User Message, AI Response, Context, Quality</p>
+          <p>Import training data with columns: Category, User Message, AI Response, Context, Quality</p>
           <p className="mt-2">Current training data: <span className="font-medium">{getStoredDataCount()} conversations</span></p>
         </div>
         
-        <div className="space-y-3">
-          <div className="relative">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              disabled={isProcessing}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              id="csv-upload"
-            />
-            <Button
-              variant="outline"
-              disabled={isProcessing}
-              className="w-full"
-              asChild
-            >
-              <label htmlFor="csv-upload" className="cursor-pointer flex items-center justify-center space-x-2">
-                <Upload className="w-4 h-4" />
-                <span>{isProcessing ? 'Processing...' : 'Upload CSV'}</span>
-              </label>
-            </Button>
-          </div>
+        <Tabs defaultValue="csv" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="csv">CSV Upload</TabsTrigger>
+            <TabsTrigger value="sheets">Google Sheets</TabsTrigger>
+          </TabsList>
           
-          {getStoredDataCount() > 0 && (
+          <TabsContent value="csv" className="space-y-3">
+            <div className="relative">
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                disabled={isProcessing}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="csv-upload"
+              />
+              <Button
+                variant="outline"
+                disabled={isProcessing}
+                className="w-full"
+                asChild
+              >
+                <label htmlFor="csv-upload" className="cursor-pointer flex items-center justify-center space-x-2">
+                  <Upload className="w-4 h-4" />
+                  <span>{isProcessing ? 'Processing...' : 'Upload CSV File'}</span>
+                </label>
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="sheets" className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="sheets-url">Google Sheets URL</Label>
+              <Input
+                id="sheets-url"
+                placeholder="https://docs.google.com/spreadsheets/d/..."
+                value={sheetsUrl}
+                onChange={(e) => setSheetsUrl(e.target.value)}
+                disabled={isProcessing}
+              />
+              <p className="text-xs text-muted-foreground">
+                Make sure your Google Sheet is publicly viewable
+              </p>
+            </div>
+            
             <Button
-              variant="outline"
-              onClick={clearTrainingData}
-              size="sm"
-              className="w-full text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={handleGoogleSheetsImport}
+              disabled={isProcessing || !sheetsUrl.trim()}
+              className="w-full"
             >
-              <XCircle className="w-4 h-4 mr-2" />
-              Clear Training Data
+              <Link className="w-4 h-4 mr-2" />
+              {isProcessing ? 'Importing...' : 'Import from Google Sheets'}
             </Button>
-          )}
-        </div>
+          </TabsContent>
+        </Tabs>
+        
+        {getStoredDataCount() > 0 && (
+          <Button
+            variant="outline"
+            onClick={clearTrainingData}
+            size="sm"
+            className="w-full text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <XCircle className="w-4 h-4 mr-2" />
+            Clear Training Data
+          </Button>
+        )}
         
         {importStats && (
           <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
