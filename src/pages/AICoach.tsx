@@ -173,11 +173,16 @@ export default function AICoach() {
     }
     
     // Return training response if we found a good match (score > 3)
-    const result = bestScore > 3 ? bestMatch?.aiResponse || null : null;
-    console.log('Best match score:', bestScore);
-    console.log('Best match response:', result);
-    console.log('Full best match:', bestMatch);
-    return result;
+    if (bestScore > 3 && bestMatch) {
+      // Combine aiResponse and context for complete response
+      const fullResponse = bestMatch.context 
+        ? `${bestMatch.aiResponse} ${bestMatch.context}`
+        : bestMatch.aiResponse;
+      console.log('Best match score:', bestScore);
+      console.log('Complete response:', fullResponse);
+      return fullResponse;
+    }
+    return null;
   };
 
   const generateCoachResponse = async (userInput: string): Promise<string> => {
