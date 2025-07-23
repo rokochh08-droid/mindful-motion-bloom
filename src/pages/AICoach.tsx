@@ -16,6 +16,7 @@ import {
   Lightbulb,
   Settings
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -99,8 +100,8 @@ export default function AICoach() {
     setInputMessage("");
 
     // Simulate AI response
-    setTimeout(() => {
-      const coachResponse = generateCoachResponse(inputMessage);
+    setTimeout(async () => {
+      const coachResponse = await generateCoachResponse(inputMessage);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'coach',
@@ -111,10 +112,28 @@ export default function AICoach() {
     }, 1000);
   };
 
-  const findBestTrainingResponse = (userInput: string): string | null => {
-    const trainingData: TrainingData[] = JSON.parse(localStorage.getItem('aiCoachTrainingData') || '[]');
+  const findBestTrainingResponse = async (userInput: string): Promise<string | null> => {
+    // First check localStorage for CSV imported data
+    const localTrainingData: TrainingData[] = JSON.parse(localStorage.getItem('aiCoachTrainingData') || '[]');
     
-    if (trainingData.length === 0) return null;
+    // Then fetch from Supabase database for Google Sheets imported data
+    const { data: dbTrainingData } = await supabase
+      .from('ai_training_data')
+      .select('*');
+    
+    // Combine both sources
+    const allTrainingData = [
+      ...localTrainingData,
+      ...(dbTrainingData || []).map(item => ({
+        category: item.category,
+        userMessage: item.user_message,
+        aiResponse: item.ai_response,
+        context: item.context || '',
+        quality: item.quality
+      }))
+    ];
+    
+    if (allTrainingData.length === 0) return null;
     
     const input = userInput.toLowerCase();
     
@@ -122,7 +141,7 @@ export default function AICoach() {
     let bestMatch: TrainingData | null = null;
     let bestScore = 0;
     
-    for (const item of trainingData) {
+    for (const item of allTrainingData) {
       const userMessage = item.userMessage.toLowerCase();
       const context = item.context.toLowerCase();
       
@@ -148,9 +167,9 @@ export default function AICoach() {
     return bestScore > 3 ? bestMatch?.aiResponse || null : null;
   };
 
-  const generateCoachResponse = (userInput: string): string => {
+  const generateCoachResponse = async (userInput: string): Promise<string> => {
     // First, try to find a matching response from training data
-    const trainingResponse = findBestTrainingResponse(userInput);
+    const trainingResponse = await findBestTrainingResponse(userInput);
     if (trainingResponse) {
       return trainingResponse;
     }
