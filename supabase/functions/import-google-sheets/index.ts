@@ -58,12 +58,13 @@ serve(async (req) => {
       const columns = lines[i].split(',').map(col => col.replace(/^"|"$/g, '').trim());
       
       if (columns.length >= 3) {
+        const qualityValue = columns[4] ? parseInt(columns[4]) : 5;
         trainingData.push({
           category: columns[0] || 'general',
           user_message: columns[1],
           ai_response: columns[2],
           context: columns[3] || null,
-          quality: columns[4] ? parseInt(columns[4]) : 5
+          quality: isNaN(qualityValue) ? 5 : qualityValue
         });
       }
     }
