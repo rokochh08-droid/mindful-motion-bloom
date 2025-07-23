@@ -46,16 +46,39 @@ serve(async (req) => {
     const csvText = await response.text();
     console.log('CSV data received, length:', csvText.length);
 
-    // Parse CSV data
+    // Parse CSV data with proper handling of quoted fields
     const lines = csvText.split('\n').filter(line => line.trim());
     if (lines.length < 2) {
       throw new Error('CSV must have at least a header row and one data row');
     }
 
+    // Function to properly parse CSV line with quoted fields
+    const parseCSVLine = (line: string): string[] => {
+      const result: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      
+      result.push(current.trim());
+      return result;
+    };
+
     // Skip header row and parse data
     const trainingData: TrainingDataRow[] = [];
     for (let i = 1; i < lines.length; i++) {
-      const columns = lines[i].split(',').map(col => col.replace(/^"|"$/g, '').trim());
+      const columns = parseCSVLine(lines[i]);
       
       if (columns.length >= 3) {
         const qualityValue = columns[4] ? parseInt(columns[4]) : 5;
