@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Play, 
   Pause, 
@@ -60,6 +61,7 @@ export function WorkoutSession({
   const [restTimer, setRestTimer] = useState(0);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [currentSet, setCurrentSet] = useState(0);
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lb'>('kg');
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -184,6 +186,18 @@ export function WorkoutSession({
                   Rest: {formatTime(restTimer)}
                 </Badge>
               )}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs text-muted-foreground">Weight Unit:</Label>
+                <Select value={weightUnit} onValueChange={(value: 'kg' | 'lb') => setWeightUnit(value)}>
+                  <SelectTrigger className="w-16 h-7 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kg">kg</SelectItem>
+                    <SelectItem value="lb">lb</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             <div className="flex space-x-2">
@@ -288,30 +302,39 @@ export function WorkoutSession({
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Label className="text-xs">Weight</Label>
+                  <Label className="text-xs text-muted-foreground">Weight ({weightUnit})</Label>
                   <div className="flex items-center space-x-1">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'weight', Math.max(0, set.weight - 5))}
+                      onClick={() => updateSet(exercise.id, setIndex, 'weight', Math.max(0, set.weight - (weightUnit === 'kg' ? 2.5 : 5)))}
                       className="w-8 h-8 p-0"
                       disabled={set.completed}
+                      title={`Decrease by ${weightUnit === 'kg' ? '2.5' : '5'} ${weightUnit}`}
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
-                    <Input
-                      type="number"
-                      value={set.weight}
-                      onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseInt(e.target.value) || 0)}
-                      className="w-16 text-center"
-                      disabled={set.completed}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        step={weightUnit === 'kg' ? '2.5' : '5'}
+                        value={set.weight}
+                        onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                        className="w-20 text-center pr-8"
+                        disabled={set.completed}
+                        placeholder="0"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        {weightUnit}
+                      </span>
+                    </div>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'weight', set.weight + 5)}
+                      onClick={() => updateSet(exercise.id, setIndex, 'weight', set.weight + (weightUnit === 'kg' ? 2.5 : 5))}
                       className="w-8 h-8 p-0"
                       disabled={set.completed}
+                      title={`Increase by ${weightUnit === 'kg' ? '2.5' : '5'} ${weightUnit}`}
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
