@@ -185,61 +185,52 @@ export function ExerciseLibrary({ onSelectExercise, onClose }: ExerciseLibraryPr
   };
 
   return (
-    <Card className="fixed inset-4 z-50 shadow-soft max-w-4xl mx-auto bg-card/95 backdrop-blur-sm border-primary/20 animate-scale-in">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-primary/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-            <Heart className="h-5 w-5 text-primary-foreground" />
-          </div>
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-4xl max-h-[90vh] border shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle className="text-2xl font-bold text-primary">Exercise Library</CardTitle>
-            <p className="text-sm text-muted-foreground">Find the perfect exercise for your workout</p>
+            <CardTitle className="text-xl font-semibold">Exercise Library</CardTitle>
+            <p className="text-sm text-muted-foreground">Choose exercises for your workout</p>
           </div>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full hover:bg-destructive/10">
-          <X className="h-4 w-4" />
-        </Button>
-      </CardHeader>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
 
-      <CardContent className="p-6">
-        <div className="space-y-6">
+        <CardContent className="p-6 pt-0">
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search exercises by name..."
+                placeholder="Search exercises..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 rounded-xl border-primary/20 focus:ring-primary/50 transition-smooth"
+                className="pl-10"
               />
             </div>
             
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setShowCustomForm(!showCustomForm)}
-                className="bg-gradient-accent hover:opacity-90 transition-smooth rounded-xl"
-                size="sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Custom Exercise
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowCustomForm(!showCustomForm)}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Custom Exercise
+            </Button>
             
             {showCustomForm && (
-              <Card className="p-4 bg-accent-light/30 border-accent/30 rounded-xl animate-scale-in">
+              <div className="p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-3">
                   <Input
-                    placeholder="Enter custom exercise name..."
+                    placeholder="Enter exercise name..."
                     value={customExerciseName}
                     onChange={(e) => setCustomExerciseName(e.target.value)}
-                    className="rounded-lg border-accent/20"
                     onKeyPress={(e) => e.key === 'Enter' && createCustomExercise()}
                   />
                   <div className="flex gap-2">
                     <Button
                       onClick={createCustomExercise}
                       disabled={!customExerciseName.trim()}
-                      className="bg-gradient-success hover:opacity-90 transition-smooth rounded-lg"
                       size="sm"
                     >
                       Add Exercise
@@ -251,79 +242,75 @@ export function ExerciseLibrary({ onSelectExercise, onClose }: ExerciseLibraryPr
                       }}
                       variant="outline"
                       size="sm"
-                      className="rounded-lg"
                     >
                       Cancel
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             )}
-          </div>
 
-          <Tabs defaultValue="All" className="w-full">
-            <TabsList className="grid w-full grid-cols-8 bg-secondary/50 rounded-xl p-1">
-              <TabsTrigger value="All" onClick={() => setSelectedBodyPart("All")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">All</TabsTrigger>
-              <TabsTrigger value="Chest" onClick={() => setSelectedBodyPart("Chest")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Chest</TabsTrigger>
-              <TabsTrigger value="Back" onClick={() => setSelectedBodyPart("Back")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Back</TabsTrigger>
-              <TabsTrigger value="Shoulders" onClick={() => setSelectedBodyPart("Shoulders")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Shoulders</TabsTrigger>
-              <TabsTrigger value="Arms" onClick={() => setSelectedBodyPart("Arms")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Arms</TabsTrigger>
-              <TabsTrigger value="Legs" onClick={() => setSelectedBodyPart("Legs")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Legs</TabsTrigger>
-              <TabsTrigger value="Core" onClick={() => setSelectedBodyPart("Core")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Core</TabsTrigger>
-              <TabsTrigger value="Full Body" onClick={() => setSelectedBodyPart("Full Body")} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-smooth">Cardio</TabsTrigger>
-            </TabsList>
+            <Tabs defaultValue="All" className="w-full">
+              <TabsList className="grid w-full grid-cols-8">
+                <TabsTrigger value="All" onClick={() => setSelectedBodyPart("All")}>All</TabsTrigger>
+                <TabsTrigger value="Chest" onClick={() => setSelectedBodyPart("Chest")}>Chest</TabsTrigger>
+                <TabsTrigger value="Back" onClick={() => setSelectedBodyPart("Back")}>Back</TabsTrigger>
+                <TabsTrigger value="Shoulders" onClick={() => setSelectedBodyPart("Shoulders")}>Shoulders</TabsTrigger>
+                <TabsTrigger value="Arms" onClick={() => setSelectedBodyPart("Arms")}>Arms</TabsTrigger>
+                <TabsTrigger value="Legs" onClick={() => setSelectedBodyPart("Legs")}>Legs</TabsTrigger>
+                <TabsTrigger value="Core" onClick={() => setSelectedBodyPart("Core")}>Core</TabsTrigger>
+                <TabsTrigger value="Full Body" onClick={() => setSelectedBodyPart("Full Body")}>Cardio</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value={selectedBodyPart} className="mt-6">
-              <ScrollArea className="h-96 pr-4">
-                <div className="grid gap-3">
-                  {filteredExercises.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                        <Search className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <p className="text-muted-foreground mb-2">No exercises found</p>
-                      <p className="text-sm text-muted-foreground">Try adjusting your search or create a custom exercise</p>
-                    </div>
-                  ) : (
-                    filteredExercises.map((exercise) => (
-                      <div
-                        key={exercise.id}
-                        className="group flex items-center justify-between p-4 border border-primary/10 rounded-xl hover:bg-primary-light/20 hover:border-primary/30 cursor-pointer transition-smooth hover:shadow-gentle"
-                        onClick={() => {
-                          onSelectExercise(exercise);
-                          toast.success(`Added ${exercise.name} to your workout! 🎯`);
-                        }}
-                      >
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-smooth">{exercise.name}</h3>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="secondary" className="text-xs bg-secondary/60 text-secondary-foreground rounded-md">
-                              {exercise.category}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs border-primary/20 text-muted-foreground rounded-md">
-                              {exercise.equipment}
-                            </Badge>
-                            <Badge className={`text-xs border-0 rounded-md ${getDifficultyColor(exercise.difficulty)}`}>
-                              {exercise.difficulty}
-                            </Badge>
-                          </div>
+              <TabsContent value={selectedBodyPart} className="mt-4">
+                <ScrollArea className="h-96">
+                  <div className="space-y-2">
+                    {filteredExercises.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                          <Search className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="ml-4 bg-gradient-primary hover:opacity-90 transition-smooth rounded-lg group-hover:scale-105"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add
-                        </Button>
+                        <p className="text-muted-foreground mb-2">No exercises found</p>
+                        <p className="text-sm text-muted-foreground">Try adjusting your search or create a custom exercise</p>
                       </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </CardContent>
-    </Card>
+                    ) : (
+                      filteredExercises.map((exercise) => (
+                        <div
+                          key={exercise.id}
+                          className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => {
+                            onSelectExercise(exercise);
+                            toast.success(`Added ${exercise.name} to your workout!`);
+                          }}
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium">{exercise.name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="text-xs">
+                                {exercise.category}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {exercise.equipment}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {exercise.difficulty}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="default">
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
