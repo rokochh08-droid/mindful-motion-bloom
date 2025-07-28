@@ -18,10 +18,12 @@ import {
   Clock,
   Target,
   Dumbbell,
-  Play
+  Play,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Exercise {
   id: string;
@@ -71,6 +73,7 @@ export default function WorkoutLog() {
   const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
   const [workoutActive, setWorkoutActive] = useState(false);
   const [workoutStarted, setWorkoutStarted] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   const addExerciseFromLibrary = (exercise: Exercise) => {
     const newWorkoutExercise: WorkoutExercise = {
@@ -116,12 +119,15 @@ export default function WorkoutLog() {
     return <Frown className="w-5 h-5 text-destructive" />;
   };
 
-  const saveWorkout = async () => {
+  const initiateWorkoutSave = () => {
     if (workoutData.exercises.length === 0) {
       toast.error("Please add at least one exercise");
       return;
     }
+    setShowCompletionModal(true);
+  };
 
+  const saveWorkout = async () => {
     if (!workoutData.name?.trim()) {
       toast.error("Please enter a workout name");
       return;
@@ -150,6 +156,7 @@ export default function WorkoutLog() {
       }
 
       toast.success("Workout saved successfully! 🎉");
+      setShowCompletionModal(false);
       
       // Reset form
       setWorkoutData({
@@ -192,19 +199,6 @@ export default function WorkoutLog() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="workout-name" className="text-sm font-medium text-primary">
-                    Workout Name (Optional)
-                  </Label>
-                  <Input
-                    id="workout-name"
-                    type="text"
-                    placeholder="e.g., Morning Push Workout, Leg Day..."
-                    value={workoutData.name || ""}
-                    onChange={(e) => setWorkoutData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1 rounded-xl border-primary/20"
-                  />
-                </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Mood</Label>
@@ -277,36 +271,61 @@ export default function WorkoutLog() {
           onAddExercise={() => setShowExerciseLibrary(true)}
         />
 
-        {/* Post-Workout Completion - Only show after workout is finished */}
-        {!workoutActive && workoutStarted && workoutData.exercises.length > 0 && (
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Smile className="w-5 h-5 mr-2 text-success" />
-                Complete Your Workout
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="workout-name-final" className="text-sm font-medium text-primary">
-                  Workout Name *
+        {/* Save Button */}
+        {workoutData.exercises.length > 0 && (
+          <Button 
+            onClick={initiateWorkoutSave}
+            className="w-full bg-gradient-success hover:shadow-glow transition-smooth py-6 text-lg"
+          >
+            <Save className="w-5 h-5 mr-2" />
+            Save Workout
+          </Button>
+        )}
+
+        {/* Workout Completion Modal */}
+        <Dialog open={showCompletionModal} onOpenChange={setShowCompletionModal}>
+          <DialogContent className="sm:max-w-lg bg-gradient-to-br from-warm-50 to-green-50 border-warm-200 rounded-2xl">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl font-bold text-warm-800 flex items-center">
+                  <Smile className="w-6 h-6 mr-2 text-success" />
+                  Amazing Work! 
+                </DialogTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCompletionModal(false)}
+                  className="text-warm-600 hover:text-warm-800"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-warm-600 mt-1">Let's capture this workout for your journey</p>
+            </DialogHeader>
+            
+            <div className="space-y-6 p-6">
+              {/* Workout Name */}
+              <div className="space-y-2">
+                <Label htmlFor="workout-name-final" className="text-sm font-medium text-warm-700">
+                  What should we call this workout? ✨
                 </Label>
                 <Input
                   id="workout-name-final"
                   type="text"
-                  placeholder="e.g., Morning Push Workout, Leg Day..."
+                  placeholder="e.g., Morning Push Session, Beast Mode Friday..."
                   value={workoutData.name || ""}
                   onChange={(e) => setWorkoutData(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 rounded-xl border-primary/20"
+                  className="rounded-xl border-warm-200 bg-white/70 focus:border-warm-400 text-warm-800"
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>Mood</Label>
+              {/* Mood After */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-warm-700">How are you feeling now?</Label>
                   <div className="flex items-center space-x-2">
                     {getMoodIcon(workoutData.moodAfter)}
-                    <span className="text-sm font-medium">{workoutData.moodAfter}/10</span>
+                    <span className="text-sm font-medium text-warm-800">{workoutData.moodAfter}/10</span>
                   </div>
                 </div>
                 <Slider
@@ -319,12 +338,13 @@ export default function WorkoutLog() {
                 />
               </div>
               
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>Energy Level</Label>
+              {/* Energy After */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-warm-700">Energy Level</Label>
                   <div className="flex items-center space-x-2">
                     <Zap className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium">{workoutData.energyAfter}/10</span>
+                    <span className="text-sm font-medium text-warm-800">{workoutData.energyAfter}/10</span>
                   </div>
                 </div>
                 <Slider
@@ -337,10 +357,11 @@ export default function WorkoutLog() {
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>How did this feel?</Label>
-                  <span className="text-sm font-medium">{workoutData.difficulty}/10</span>
+              {/* Difficulty */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-warm-700">How challenging was this?</Label>
+                  <span className="text-sm font-medium text-warm-800">{workoutData.difficulty}/10</span>
                 </div>
                 <Slider
                   value={[workoutData.difficulty]}
@@ -350,17 +371,18 @@ export default function WorkoutLog() {
                   step={1}
                   className="mb-2"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-warm-600">
                   <span>Too Easy</span>
                   <span>Perfect</span>
                   <span>Too Hard</span>
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="duration" className="flex items-center mb-2">
+              {/* Duration */}
+              <div className="space-y-2">
+                <Label htmlFor="duration" className="text-sm font-medium text-warm-700 flex items-center">
                   <Clock className="w-4 h-4 mr-2" />
-                  Duration (minutes)
+                  How long did this take? (minutes)
                 </Label>
                 <Input
                   id="duration"
@@ -368,33 +390,37 @@ export default function WorkoutLog() {
                   value={workoutData.duration}
                   onChange={(e) => setWorkoutData(prev => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
                   placeholder="e.g. 45"
+                  className="rounded-xl border-warm-200 bg-white/70 focus:border-warm-400"
                 />
               </div>
 
-              <div>
-                <Label htmlFor="notes">Notes (optional)</Label>
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="notes" className="text-sm font-medium text-warm-700">
+                  Any thoughts to remember? 💭
+                </Label>
                 <Textarea
                   id="notes"
-                  placeholder="How did you feel? Any insights or observations?"
+                  placeholder="Felt stronger today, need more rest between sets, loved this routine..."
                   value={workoutData.notes}
                   onChange={(e) => setWorkoutData(prev => ({ ...prev, notes: e.target.value }))}
                   rows={3}
+                  className="rounded-xl border-warm-200 bg-white/70 focus:border-warm-400 resize-none"
                 />
               </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Save Button */}
-        {workoutData.exercises.length > 0 && (
-          <Button 
-            onClick={saveWorkout}
-            className="w-full bg-gradient-success hover:shadow-glow transition-smooth py-6 text-lg"
-          >
-            <Save className="w-5 h-5 mr-2" />
-            Save Workout
-          </Button>
-        )}
+              {/* Save Button */}
+              <Button 
+                onClick={saveWorkout}
+                className="w-full bg-gradient-success hover:shadow-glow transition-smooth py-4 text-lg rounded-xl"
+                disabled={!workoutData.name?.trim()}
+              >
+                <Save className="w-5 h-5 mr-2" />
+                Save This Amazing Workout! 🎉
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
