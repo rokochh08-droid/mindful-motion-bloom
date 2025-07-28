@@ -390,14 +390,14 @@ export function WorkoutSession({
         </Card>
       ))}
 
-      {/* Add Exercise Button - Only show when workout is active */}
-      {isActive && onAddExercise && (
+      {/* Add Exercise Button - Show when there are exercises */}
+      {exercises.length > 0 && onAddExercise && (
         <Card className="shadow-card">
           <CardContent className="p-4">
             <Button 
               onClick={onAddExercise}
               variant="outline"
-              className="w-full bg-warm-50 hover:bg-warm-100 border-warm-200 text-warm-700 hover:text-warm-800 rounded-xl border-dashed h-12"
+              className="w-full bg-warm-50 hover:bg-warm-100 border-warm-200 text-warm-700 hover:text-warm-800 rounded-xl border-dashed h-12 animate-fade-in"
             >
               <Dumbbell className="w-5 h-5 mr-2" />
               Add Another Exercise
