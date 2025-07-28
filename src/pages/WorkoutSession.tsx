@@ -179,80 +179,34 @@ export default function WorkoutSession() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="max-w-md mx-auto p-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToWorkout}
-              className="opacity-70 hover:opacity-100"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            
-            <div className="text-center">
-              <div className="flex items-center space-x-2">
-                <Timer className="w-5 h-5 text-primary" />
-                <span className="text-2xl font-mono font-bold text-primary">
-                  {formatTime(workoutTime)}
-                </span>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Exercise {currentExerciseIndex >= 0 ? currentExerciseIndex + 1 : exercises.length} of {exercises.length}
-              </div>
+    <div className="min-h-screen bg-background">
+      {/* Clean Header */}
+      <div className="p-6 pb-0">
+        <div className="flex items-center justify-between mb-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToWorkout}
+            className="p-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          
+          {/* Clean Timer */}
+          <div className="text-center">
+            <div className="text-4xl font-light text-foreground">
+              {formatTime(workoutTime)}
             </div>
-
-            <div className="flex items-center space-x-1">
-              {completedExercises > 0 && (
-                <Badge variant="secondary" className="bg-success/20 text-success">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  {completedExercises}
-                </Badge>
-              )}
+            <div className="text-sm text-muted-foreground mt-1">
+              {currentExerciseIndex >= 0 ? currentExerciseIndex + 1 : exercises.length} of {exercises.length}
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Workout Progress</span>
-              <span className="font-semibold">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
+          <div className="w-9" /> {/* Spacer for balance */}
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 pb-20">
-        {/* Motivational Message */}
-        <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              {progress < 33 ? (
-                <Zap className="w-5 h-5 text-primary" />
-              ) : progress < 66 ? (
-                <Dumbbell className="w-5 h-5 text-primary" />
-              ) : (
-                <Trophy className="w-5 h-5 text-warning" />
-              )}
-              <span className="text-lg font-bold text-primary">{currentMessage}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {progress < 33 
-                ? "Just getting started - you've got this!"
-                : progress < 66 
-                ? "Halfway there - keep pushing!"
-                : progress < 100
-                ? "Almost done - finish strong!"
-                : "Workout complete - you're a champion!"
-              }
-            </p>
-          </CardContent>
-        </Card>
-
+      <div className="px-6 pb-32">
         {/* Workout Session Component */}
         <WorkoutSessionComponent
           exercises={exercises}
@@ -263,36 +217,25 @@ export default function WorkoutSession() {
           onFinishWorkout={handleFinishWorkout}
           onAddExercise={handleAddExercise}
         />
+      </div>
 
-        {/* Bottom Actions */}
-        <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto">
-          <div className="flex space-x-3">
-            {!isActive ? (
-              <Button 
-                onClick={handleResumeWorkout}
-                className="flex-1 bg-gradient-success h-14 text-lg font-semibold"
-              >
-                <Timer className="w-5 h-5 mr-2" />
-                Resume Workout
-              </Button>
-            ) : (
-              <Button 
-                variant="outline"
-                onClick={handlePauseWorkout}
-                className="flex-1 h-14 text-lg font-semibold"
-              >
-                Pause
-              </Button>
-            )}
-            
-            <Button 
-              onClick={handleFinishWorkout}
-              className="flex-1 bg-gradient-primary h-14 text-lg font-semibold"
-            >
-              <Trophy className="w-5 h-5 mr-2" />
-              Finish Workout
-            </Button>
-          </div>
+      {/* Clean Bottom Actions */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-6">
+        <div className="max-w-md mx-auto space-y-4">
+          <Button 
+            variant="ghost"
+            onClick={handleAddExercise}
+            className="w-full h-12 text-base"
+          >
+            Add Exercise
+          </Button>
+          
+          <Button 
+            onClick={handleFinishWorkout}
+            className="w-full h-14 text-lg bg-primary text-primary-foreground"
+          >
+            Finish Workout
+          </Button>
         </div>
       </div>
     </div>
