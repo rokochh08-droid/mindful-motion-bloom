@@ -181,17 +181,7 @@ export function WorkoutSession({
   };
 
   if (exercises.length === 0) {
-    return (
-      <Card className="shadow-card">
-        <CardContent className="text-center py-8">
-          <Target className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">Ready to Start?</h3>
-          <p className="text-muted-foreground mb-4">
-            Add exercises to begin your workout session
-          </p>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
