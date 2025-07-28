@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,24 @@ interface RestTimerProps {
 
 export function RestTimer({ isOpen, onClose, onStartRest }: RestTimerProps) {
   const [customTime, setCustomTime] = useState<string>("");
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear any existing timer when component unmounts or closes
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [isOpen]);
 
   const presetTimes = [
     { label: "30s", seconds: 30 },

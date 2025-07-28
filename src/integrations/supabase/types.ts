@@ -47,6 +47,57 @@ export type Database = {
         }
         Relationships: []
       }
+      workouts: {
+        Row: {
+          completed_at: string
+          created_at: string
+          difficulty: number
+          duration: number
+          energy_after: number
+          energy_before: number
+          exercises: Json
+          id: string
+          mood_after: number
+          mood_before: number
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          difficulty: number
+          duration: number
+          energy_after: number
+          energy_before: number
+          exercises: Json
+          id?: string
+          mood_after: number
+          mood_before: number
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          difficulty?: number
+          duration?: number
+          energy_after?: number
+          energy_before?: number
+          exercises?: Json
+          id?: string
+          mood_after?: number
+          mood_before?: number
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

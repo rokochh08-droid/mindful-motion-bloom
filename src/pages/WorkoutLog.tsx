@@ -21,6 +21,7 @@ import {
   Play
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Exercise {
   id: string;
@@ -115,36 +116,57 @@ export default function WorkoutLog() {
     return <Frown className="w-5 h-5 text-destructive" />;
   };
 
-  const saveWorkout = () => {
+  const saveWorkout = async () => {
     if (workoutData.exercises.length === 0) {
       toast.error("Please add at least one exercise");
       return;
     }
 
-    // Save to localStorage (in real app, this would be API call)
-    const savedWorkouts = JSON.parse(localStorage.getItem('workouts') || '[]');
-    const workout = {
-      ...workoutData,
-      date: new Date().toISOString(),
-      id: Date.now().toString()
-    };
-    
-    savedWorkouts.push(workout);
-    localStorage.setItem('workouts', JSON.stringify(savedWorkouts));
+    if (!workoutData.name?.trim()) {
+      toast.error("Please enter a workout name");
+      return;
+    }
 
-    toast.success("Workout saved successfully! 🎉");
-    
-    // Reset form
-    setWorkoutData({
-      exercises: [],
-      moodBefore: 5,
-      moodAfter: 5,
-      energyBefore: 5,
-      energyAfter: 5,
-      notes: "",
-      duration: 0,
-      difficulty: 5
-    });
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .insert({
+          name: workoutData.name,
+          exercises: workoutData.exercises as any,
+          mood_before: workoutData.moodBefore,
+          mood_after: workoutData.moodAfter,
+          energy_before: workoutData.energyBefore,
+          energy_after: workoutData.energyAfter,
+          difficulty: workoutData.difficulty,
+          duration: workoutData.duration,
+          notes: workoutData.notes || null,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      if (error) {
+        toast.error("Failed to save workout");
+        console.error(error);
+        return;
+      }
+
+      toast.success("Workout saved successfully! 🎉");
+      
+      // Reset form
+      setWorkoutData({
+        exercises: [],
+        moodBefore: 5,
+        moodAfter: 5,
+        energyBefore: 5,
+        energyAfter: 5,
+        notes: "",
+        duration: 0,
+        difficulty: 5
+      });
+      setWorkoutStarted(false);
+    } catch (error) {
+      toast.error("Failed to save workout");
+      console.error(error);
+    }
   };
 
   return (
@@ -255,16 +277,30 @@ export default function WorkoutLog() {
           onAddExercise={() => setShowExerciseLibrary(true)}
         />
 
-        {/* Post-Workout Mood & Energy - Only show after workout is finished */}
+        {/* Post-Workout Completion - Only show after workout is finished */}
         {!workoutActive && workoutStarted && workoutData.exercises.length > 0 && (
           <Card className="shadow-card">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
                 <Smile className="w-5 h-5 mr-2 text-success" />
-                After Your Workout
+                Complete Your Workout
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="workout-name-final" className="text-sm font-medium text-primary">
+                  Workout Name *
+                </Label>
+                <Input
+                  id="workout-name-final"
+                  type="text"
+                  placeholder="e.g., Morning Push Workout, Leg Day..."
+                  value={workoutData.name || ""}
+                  onChange={(e) => setWorkoutData(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1 rounded-xl border-primary/20"
+                />
+              </div>
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Label>Mood</Label>
