@@ -255,138 +255,21 @@ export default function WorkoutLog() {
 
           <TabsContent value="current" className="space-y-6 mt-6">
 
-        {/* Pre-Workout Setup - Only show if workout hasn't started */}
-        {!workoutStarted && (
-          <>
-            <Card className="shadow-card border-primary/10 bg-gradient-calm/10">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center text-primary">
-                  <Target className="w-5 h-5 mr-2" />
-                  Before Your Workout
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>Mood</Label>
-                    <div className="flex items-center space-x-2">
-                      {getMoodIcon(workoutData.moodBefore)}
-                      <span className="text-sm font-medium">{workoutData.moodBefore}/10</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={[workoutData.moodBefore]}
-                    onValueChange={([value]) => setWorkoutData(prev => ({ ...prev, moodBefore: value }))}
-                    max={10}
-                    min={1}
-                    step={1}
-                    className="mb-2"
-                  />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>Energy Level</Label>
-                    <div className="flex items-center space-x-2">
-                      <Zap className="w-4 h-4 text-accent" />
-                      <span className="text-sm font-medium">{workoutData.energyBefore}/10</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={[workoutData.energyBefore]}
-                    onValueChange={([value]) => setWorkoutData(prev => ({ ...prev, energyBefore: value }))}
-                    max={10}
-                    min={1}
-                    step={1}
-                    className="mb-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-        {/* Start Workout Button */}
-        <Card className="shadow-card">
-          <CardContent className="p-6 text-center">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-primary/10 rounded-full">
-                <Play className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Ready to Begin?</h3>
-                <p className="text-muted-foreground text-sm mb-4">Start by adding your first exercise</p>
-              </div>
-              <Button 
-                onClick={() => {
-                  if (workoutData.exercises.length === 0) {
-                    setShowExerciseLibrary(true);
-                  } else {
-                    // Skip preview for single exercise, go directly to session
-                    navigate('/workout/session', { state: { exercises: workoutData.exercises } });
-                  }
-                }} 
-                className="w-full bg-gradient-primary h-12"
-              >
-                <Dumbbell className="w-5 h-5 mr-2" />
-                {workoutData.exercises.length === 0 ? 'Add Exercise' : 'Start Workout'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-          </>
-        )}
-
-        {/* Exercise Library Modal */}
-        {showExerciseLibrary && (
+        {/* Always show exercise library when no workout is active */}
+        {!workoutStarted && !showExerciseLibrary && (
           <ExerciseLibrary 
-            onSelectExercise={addExerciseFromLibrary}
-            onClose={() => setShowExerciseLibrary(false)}
+            onSelectExercise={(exercise) => {
+              const newWorkoutExercise: WorkoutExercise = {
+                ...exercise,
+                sets: [{ reps: 0, weight: 0, completed: false }]
+              };
+              // Go directly to workout session
+              navigate('/workout/session', { state: { exercises: [newWorkoutExercise] } });
+            }}
+            onClose={() => navigate('/')}
           />
         )}
 
-        {/* Exercise Preview - Only show if multiple exercises added but workout not started */}
-        {workoutData.exercises.length > 1 && !workoutStarted && (
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle className="text-lg text-primary flex items-center">
-                <Dumbbell className="w-5 h-5 mr-2" />
-                Workout Preview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {workoutData.exercises.map((exercise, idx) => (
-                <div key={exercise.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div>
-                    <span className="font-medium text-foreground">{exercise.name}</span>
-                    <div className="text-xs text-muted-foreground">
-                      {exercise.sets.length} sets planned
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {exercise.bodyPart}
-                  </Badge>
-                </div>
-              ))}
-              <Button 
-                onClick={() => navigate('/workout/session', { state: { exercises: workoutData.exercises } })}
-                className="w-full bg-gradient-success h-12 mt-4"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Start Workout Session
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Save Button */}
-        {workoutData.exercises.length > 0 && (
-          <Button 
-            onClick={initiateWorkoutSave}
-            className="w-full bg-gradient-success hover:shadow-glow transition-smooth py-6 text-lg"
-          >
-            <Save className="w-5 h-5 mr-2" />
-            Save Workout
-          </Button>
-        )}
 
         {/* Workout Completion Modal */}
         <Dialog open={showCompletionModal} onOpenChange={setShowCompletionModal}>
