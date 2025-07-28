@@ -193,126 +193,128 @@ export function WorkoutSession({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Exercises */}
       {exercises.map((exercise, exerciseIndex) => (
-        <div key={exercise.id} className="space-y-6 pb-8">
+        <div key={exercise.id} className="space-y-8">
           {/* Exercise separator for multiple exercises */}
           {exerciseIndex > 0 && (
-            <div className="border-t border-border pt-8 -mt-8" />
+            <div className="border-t border-border pt-12 -mt-12" />
           )}
           
           {/* Exercise Name */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-light text-foreground">{exercise.name}</h1>
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl font-light text-foreground tracking-wide">{exercise.name}</h1>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => removeExercise(exercise.id)}
-              className="text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0 rounded-full"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Sets */}
-          <div className="space-y-4">
+          <div className="space-y-8">
             {exercise.sets.map((set, setIndex) => (
-              <div key={setIndex} className="space-y-6">
+              <div key={setIndex} className="space-y-8">
                 {/* Set/Reps/Weight Row */}
-                <div className="flex items-center justify-center space-x-8">
+                <div className="flex items-center justify-center gap-12">
                   {/* Set Number */}
-                  <div className="text-center">
+                  <div className="text-center min-w-[60px]">
                     {set.completed ? (
-                      <CheckCircle2 className="w-8 h-8 text-success mx-auto animate-scale-in" />
+                      <CheckCircle2 className="w-10 h-10 text-primary mx-auto" />
                     ) : (
                       <div className="text-4xl font-light text-foreground">{setIndex + 1}</div>
                     )}
-                    <div className="text-sm text-muted-foreground mt-1">SET</div>
+                    <div className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">SET</div>
                   </div>
                   
                   {/* Reps */}
                   <div className="text-center">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-4">
                       <Button
                         size="lg"
                         variant="ghost"
                         onClick={() => updateSet(exercise.id, setIndex, 'reps', Math.max(1, set.reps - 1))}
-                        className="w-14 h-14 p-0 rounded-full"
+                        className="w-12 h-12 p-0 rounded-full hover:bg-muted/50"
                         disabled={set.completed}
                       >
-                        <Minus className="w-6 h-6" />
+                        <Minus className="w-5 h-5" />
                       </Button>
-                      <div className="text-center min-w-[80px]">
-                        <Input
-                          type="number"
-                          value={set.reps}
-                          onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-20 h-14 text-center text-3xl font-semibold border-none bg-transparent p-1 focus:ring-0"
-                          min="1"
-                          disabled={set.completed}
-                        />
-                        <div className="text-sm text-muted-foreground mt-1">REPS</div>
+                      <div className="text-center">
+                        <div className="w-20 h-16 flex items-center justify-center bg-muted/30 rounded-lg border-0">
+                          <input
+                            type="number"
+                            value={set.reps}
+                            onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-full h-full text-center text-3xl font-light bg-transparent border-0 outline-none focus:ring-0"
+                            min="1"
+                            disabled={set.completed}
+                          />
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">REPS</div>
                       </div>
                       <Button
                         size="lg"
                         variant="ghost"
                         onClick={() => updateSet(exercise.id, setIndex, 'reps', set.reps + 1)}
-                        className="w-14 h-14 p-0 rounded-full"
+                        className="w-12 h-12 p-0 rounded-full hover:bg-muted/50"
                         disabled={set.completed}
                       >
-                        <Plus className="w-6 h-6" />
+                        <Plus className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
 
                   {/* Weight */}
                   <div className="text-center">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-4">
                       <Button
                         size="lg"
                         variant="ghost"
                         onClick={() => updateSet(exercise.id, setIndex, 'weight', Math.max(0, set.weight - (weightUnit === 'kg' ? 2.5 : 5)))}
-                        className="w-14 h-14 p-0 rounded-full"
+                        className="w-12 h-12 p-0 rounded-full hover:bg-muted/50"
                         disabled={set.completed}
                       >
-                        <Minus className="w-6 h-6" />
+                        <Minus className="w-5 h-5" />
                       </Button>
-                      <div className="text-center min-w-[100px]">
-                        <div className="flex items-end justify-center">
-                          <Input
+                      <div className="text-center">
+                        <div className="w-24 h-16 flex items-center justify-center bg-muted/30 rounded-lg border-0 relative">
+                          <input
                             type="number"
                             value={set.weight}
                             onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
-                            className="w-24 h-14 text-center text-3xl font-semibold border-none bg-transparent p-1 focus:ring-0"
+                            className="w-full h-full text-center text-3xl font-light bg-transparent border-0 outline-none focus:ring-0 pr-8"
                             min="0"
                             step={weightUnit === 'kg' ? '2.5' : '5'}
                             disabled={set.completed}
                           />
-                          <span className="text-xl text-muted-foreground ml-1 mb-1">{weightUnit}</span>
+                          <span className="absolute right-2 text-lg text-muted-foreground font-light">{weightUnit}</span>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">WEIGHT</div>
+                        <div className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">WEIGHT</div>
                       </div>
                       <Button
                         size="lg"
                         variant="ghost"
                         onClick={() => updateSet(exercise.id, setIndex, 'weight', set.weight + (weightUnit === 'kg' ? 2.5 : 5))}
-                        className="w-14 h-14 p-0 rounded-full"
+                        className="w-12 h-12 p-0 rounded-full hover:bg-muted/50"
                         disabled={set.completed}
                       >
-                        <Plus className="w-6 h-6" />
+                        <Plus className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
                 </div>
 
-                {/* Remove Set Button and Complete Set Button */}
+                {/* Action Buttons */}
                 <div className="text-center space-y-4">
                   {!set.completed && (
                     <Button
                       size="lg"
                       onClick={() => completeSet(exercise.id, setIndex)}
-                      className="h-14 px-12 text-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                      className="h-14 px-12 text-lg rounded-xl"
                     >
                       Complete Set
                     </Button>
@@ -323,7 +325,7 @@ export function WorkoutSession({
                       variant="ghost"
                       size="sm"
                       onClick={() => removeSet(exercise.id, setIndex)}
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-muted-foreground hover:text-destructive h-8 px-4 rounded-lg"
                     >
                       Remove Set
                     </Button>
@@ -333,11 +335,11 @@ export function WorkoutSession({
             ))}
             
             {/* Add Set */}
-            <div className="text-center pt-4">
+            <div className="text-center pt-6">
               <Button
-                variant="ghost"
+                variant="outline"
                 onClick={() => addSet(exercise.id)}
-                className="text-lg"
+                className="h-12 px-8 text-base rounded-xl"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Add Set
@@ -348,9 +350,9 @@ export function WorkoutSession({
       ))}
 
       {/* Weight Unit Selector */}
-      <div className="text-center">
+      <div className="text-center pt-8">
         <Select value={weightUnit} onValueChange={(value: 'kg' | 'lb') => setWeightUnit(value)}>
-          <SelectTrigger className="w-20 h-10 mx-auto">
+          <SelectTrigger className="w-20 h-10 mx-auto rounded-lg border-muted">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
