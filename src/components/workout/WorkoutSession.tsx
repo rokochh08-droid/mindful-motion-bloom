@@ -196,7 +196,12 @@ export function WorkoutSession({
     <div className="space-y-8">
       {/* Exercises */}
       {exercises.map((exercise, exerciseIndex) => (
-        <div key={exercise.id} className="space-y-6">
+        <div key={exercise.id} className="space-y-6 pb-8">
+          {/* Exercise separator for multiple exercises */}
+          {exerciseIndex > 0 && (
+            <div className="border-t border-border pt-8 -mt-8" />
+          )}
+          
           {/* Exercise Name */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-light text-foreground">{exercise.name}</h1>
