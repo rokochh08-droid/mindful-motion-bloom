@@ -239,7 +239,14 @@ export function WorkoutSession({
                         <Minus className="w-6 h-6" />
                       </Button>
                       <div className="text-center min-w-[80px]">
-                        <div className="text-5xl font-light text-foreground">{set.reps}</div>
+                        <Input
+                          type="number"
+                          value={set.reps}
+                          onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-20 h-16 text-center text-4xl font-light border-none bg-transparent p-0 focus:ring-0"
+                          min="1"
+                          disabled={set.completed}
+                        />
                         <div className="text-sm text-muted-foreground mt-1">REPS</div>
                       </div>
                       <Button
@@ -267,9 +274,17 @@ export function WorkoutSession({
                         <Minus className="w-6 h-6" />
                       </Button>
                       <div className="text-center min-w-[100px]">
-                        <div className="text-5xl font-light text-foreground">
-                          {set.weight}
-                          <span className="text-2xl text-muted-foreground ml-1">{weightUnit}</span>
+                        <div className="flex items-end justify-center">
+                          <Input
+                            type="number"
+                            value={set.weight}
+                            onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
+                            className="w-24 h-16 text-center text-4xl font-light border-none bg-transparent p-0 focus:ring-0"
+                            min="0"
+                            step={weightUnit === 'kg' ? '2.5' : '5'}
+                            disabled={set.completed}
+                          />
+                          <span className="text-2xl text-muted-foreground ml-1 mb-2">{weightUnit}</span>
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">WEIGHT</div>
                       </div>

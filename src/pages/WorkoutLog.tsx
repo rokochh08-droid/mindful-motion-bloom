@@ -320,6 +320,7 @@ export default function WorkoutLog() {
                   if (workoutData.exercises.length === 0) {
                     setShowExerciseLibrary(true);
                   } else {
+                    // Skip preview for single exercise, go directly to session
                     navigate('/workout/session', { state: { exercises: workoutData.exercises } });
                   }
                 }} 
@@ -342,8 +343,8 @@ export default function WorkoutLog() {
           />
         )}
 
-        {/* Exercise Preview - Only show if exercises added but workout not started */}
-        {workoutData.exercises.length > 0 && !workoutStarted && (
+        {/* Exercise Preview - Only show if multiple exercises added but workout not started */}
+        {workoutData.exercises.length > 1 && !workoutStarted && (
           <Card className="shadow-card">
             <CardHeader>
               <CardTitle className="text-lg text-primary flex items-center">
