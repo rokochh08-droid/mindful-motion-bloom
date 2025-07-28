@@ -15,9 +15,12 @@ import {
   Timer, 
   Target,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Dumbbell,
+  Clock
 } from "lucide-react";
 import { toast } from "sonner";
+import { RestTimer } from "./RestTimer";
 
 interface Exercise {
   id: string;
@@ -47,6 +50,7 @@ interface WorkoutSessionProps {
   onStartWorkout: () => void;
   onPauseWorkout: () => void;
   onFinishWorkout: () => void;
+  onAddExercise?: () => void;
 }
 
 export function WorkoutSession({ 
@@ -55,13 +59,15 @@ export function WorkoutSession({
   onUpdateExercises, 
   onStartWorkout, 
   onPauseWorkout, 
-  onFinishWorkout 
+  onFinishWorkout,
+  onAddExercise 
 }: WorkoutSessionProps) {
   const [workoutTime, setWorkoutTime] = useState(0);
   const [restTimer, setRestTimer] = useState(0);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [currentSet, setCurrentSet] = useState(0);
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lb'>('kg');
+  const [showRestTimer, setShowRestTimer] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -145,8 +151,13 @@ export function WorkoutSession({
 
   const completeSet = (exerciseId: string, setIndex: number) => {
     updateSet(exerciseId, setIndex, 'completed', true);
-    setRestTimer(90); // Start 90 second rest timer
     toast.success("Set completed! 🎯");
+    setShowRestTimer(true);
+  };
+
+  const handleStartRest = (seconds: number) => {
+    setRestTimer(seconds);
+    toast.success(`Rest timer started: ${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`);
   };
 
   const getCompletionProgress = () => {
@@ -378,6 +389,29 @@ export function WorkoutSession({
           </CardContent>
         </Card>
       ))}
+
+      {/* Add Exercise Button - Only show when workout is active */}
+      {isActive && onAddExercise && (
+        <Card className="shadow-card">
+          <CardContent className="p-4">
+            <Button 
+              onClick={onAddExercise}
+              variant="outline"
+              className="w-full bg-warm-50 hover:bg-warm-100 border-warm-200 text-warm-700 hover:text-warm-800 rounded-xl border-dashed h-12"
+            >
+              <Dumbbell className="w-5 h-5 mr-2" />
+              Add Another Exercise
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Rest Timer Modal */}
+      <RestTimer
+        isOpen={showRestTimer}
+        onClose={() => setShowRestTimer(false)}
+        onStartRest={handleStartRest}
+      />
     </div>
   );
 }

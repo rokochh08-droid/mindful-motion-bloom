@@ -252,6 +252,7 @@ export default function WorkoutLog() {
           onStartWorkout={startWorkout}
           onPauseWorkout={pauseWorkout}
           onFinishWorkout={finishWorkout}
+          onAddExercise={() => setShowExerciseLibrary(true)}
         />
 
         {/* Post-Workout Mood & Energy - Only show after workout is finished */}
