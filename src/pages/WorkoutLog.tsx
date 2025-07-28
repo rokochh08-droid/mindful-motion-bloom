@@ -133,7 +133,25 @@ export default function WorkoutLog() {
       return;
     }
 
-    // For now, just simulate saving without authentication
+    // Save to localStorage for now
+    const workoutToSave = {
+      id: crypto.randomUUID(),
+      name: workoutData.name,
+      exercises: workoutData.exercises,
+      mood_before: workoutData.moodBefore,
+      mood_after: workoutData.moodAfter,
+      energy_before: workoutData.energyBefore,
+      energy_after: workoutData.energyAfter,
+      difficulty: workoutData.difficulty,
+      duration: workoutData.duration,
+      notes: workoutData.notes || null,
+      completed_at: new Date().toISOString()
+    };
+
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    savedWorkouts.unshift(workoutToSave);
+    localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
+
     toast.success("Workout saved successfully! 🎉");
     setShowCompletionModal(false);
     

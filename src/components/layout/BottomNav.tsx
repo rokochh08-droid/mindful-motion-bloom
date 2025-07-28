@@ -1,13 +1,13 @@
-import { Home, Activity, Brain, TrendingUp, Users, User } from "lucide-react";
+import { Home, Activity, Brain, TrendingUp, Users, User, History } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/workout", icon: Activity, label: "Workout" },
+  { path: "/history", icon: History, label: "History" },
   { path: "/coach", icon: Brain, label: "AI Coach" },
   { path: "/progress", icon: TrendingUp, label: "Progress" },
-  { path: "/community", icon: Users, label: "Community" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
 

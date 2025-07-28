@@ -55,21 +55,14 @@ export default function WorkoutHistory() {
 
   const fetchWorkouts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select('*')
-        .order('completed_at', { ascending: false });
-
-      if (error) {
-        toast.error("Failed to load workout history");
-        console.error(error);
-        return;
+      // For now, get workouts from localStorage since authentication is disabled
+      const savedWorkouts = localStorage.getItem('savedWorkouts');
+      if (savedWorkouts) {
+        const workoutsData = JSON.parse(savedWorkouts);
+        setWorkouts(workoutsData);
+      } else {
+        setWorkouts([]);
       }
-
-      setWorkouts(data?.map(workout => ({
-        ...workout,
-        exercises: (workout.exercises as unknown) as WorkoutExercise[]
-      })) || []);
     } catch (error) {
       toast.error("Failed to load workout history");
       console.error(error);
