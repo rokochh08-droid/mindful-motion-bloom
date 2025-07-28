@@ -154,7 +154,15 @@ export function WorkoutSession({
 
   const completeSet = (exerciseId: string, setIndex: number) => {
     updateSet(exerciseId, setIndex, 'completed', true);
-    toast.success("Set completed! 🎯");
+    const encouragingMessages = [
+      "Great set! 💪",
+      "You've got this! 🔥",
+      "Beast mode! 🦁",
+      "Strong work! ⚡",
+      "Crushing it! 🎯"
+    ];
+    const randomMessage = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+    toast.success(randomMessage);
     setShowRestTimer(true);
   };
 
@@ -190,18 +198,26 @@ export function WorkoutSession({
       <Card className="shadow-card">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Timer className="w-5 h-5 text-primary" />
-                <span className="text-2xl font-mono font-bold">{formatTime(workoutTime)}</span>
-              </div>
+            <div className="flex items-center space-x-6">
+              {!isActive && (
+                <div className="flex items-center space-x-2 opacity-60">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-lg font-mono text-muted-foreground">{formatTime(workoutTime)}</span>
+                </div>
+              )}
+              {isActive && (
+                <div className="flex items-center space-x-2">
+                  <Timer className="w-5 h-5 text-primary" />
+                  <span className="text-2xl font-mono font-bold text-primary">{formatTime(workoutTime)}</span>
+                </div>
+              )}
               {restTimer > 0 && (
-                <Badge variant="outline" className="bg-warning/20 text-warning">
+                <Badge variant="outline" className="bg-warning/20 text-warning animate-pulse">
                   Rest: {formatTime(restTimer)}
                 </Badge>
               )}
               <div className="flex items-center space-x-2">
-                <Label className="text-xs text-muted-foreground">Weight Unit:</Label>
+                <Label className="text-xs text-muted-foreground">Unit:</Label>
                 <Select value={weightUnit} onValueChange={(value: 'kg' | 'lb') => setWeightUnit(value)}>
                   <SelectTrigger className="w-16 h-7 text-xs">
                     <SelectValue />
@@ -248,20 +264,20 @@ export function WorkoutSession({
       {/* Exercises */}
       {exercises.map((exercise, exerciseIndex) => (
         <Card key={exercise.id} className="shadow-card">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg">{exercise.name}</CardTitle>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Badge variant="outline" className="text-xs">{exercise.bodyPart}</Badge>
-                  <Badge variant="outline" className="text-xs">{exercise.equipment}</Badge>
+                <CardTitle className="text-2xl font-bold text-foreground mb-2">{exercise.name}</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="secondary" className="text-xs opacity-60">{exercise.bodyPart}</Badge>
+                  <Badge variant="secondary" className="text-xs opacity-60">{exercise.equipment}</Badge>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeExercise(exercise.id)}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive opacity-60 hover:opacity-100"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -272,97 +288,93 @@ export function WorkoutSession({
             {exercise.sets.map((set, setIndex) => (
               <div 
                 key={setIndex} 
-                className={`flex items-center space-x-3 p-3 rounded-lg transition-smooth ${
-                  set.completed ? 'bg-success/10 border border-success/20' : 'bg-muted'
+                className={`flex items-center justify-between p-6 rounded-xl transition-all duration-300 ${
+                  set.completed 
+                    ? 'bg-gradient-to-r from-success/10 to-success/5 border-2 border-success/30 animate-scale-in shadow-success/20 shadow-lg' 
+                    : 'bg-card border-2 border-border/50 hover:border-primary/30'
                 }`}
               >
-                <span className="text-sm font-medium w-12">
-                  {set.completed ? (
-                    <CheckCircle2 className="w-5 h-5 text-success" />
-                  ) : (
-                    `Set ${setIndex + 1}`
-                  )}
-                </span>
-                
-                <div className="flex items-center space-x-2">
-                  <Label className="text-xs">Reps</Label>
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'reps', Math.max(1, set.reps - 1))}
-                      className="w-8 h-8 p-0"
-                      disabled={set.completed}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <Input
-                      type="number"
-                      value={set.reps}
-                      onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-16 text-center"
-                      disabled={set.completed}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'reps', set.reps + 1)}
-                      className="w-8 h-8 p-0"
-                      disabled={set.completed}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Label className="text-xs text-muted-foreground">Weight ({weightUnit})</Label>
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'weight', Math.max(0, set.weight - (weightUnit === 'kg' ? 2.5 : 5)))}
-                      className="w-8 h-8 p-0"
-                      disabled={set.completed}
-                      title={`Decrease by ${weightUnit === 'kg' ? '2.5' : '5'} ${weightUnit}`}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        step={weightUnit === 'kg' ? '2.5' : '5'}
-                        value={set.weight}
-                        onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
-                        className="w-20 text-center pr-8"
-                        disabled={set.completed}
-                        placeholder="0"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-                        {weightUnit}
+                <div className="flex items-center space-x-4">
+                  <div className="flex flex-col items-center min-w-[60px]">
+                    {set.completed ? (
+                      <CheckCircle2 className="w-8 h-8 text-success animate-scale-in" />
+                    ) : (
+                      <span className="text-2xl font-bold text-foreground">
+                        {setIndex + 1}
                       </span>
+                    )}
+                    <span className="text-xs text-muted-foreground mt-1">SET</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <div className="text-center">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={() => updateSet(exercise.id, setIndex, 'reps', Math.max(1, set.reps - 1))}
+                          className="w-12 h-12 p-0 touch-manipulation"
+                          disabled={set.completed}
+                        >
+                          <Minus className="w-5 h-5" />
+                        </Button>
+                        <div className="text-center min-w-[80px]">
+                          <div className="text-3xl font-bold text-foreground">{set.reps}</div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide">REPS</div>
+                        </div>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={() => updateSet(exercise.id, setIndex, 'reps', set.reps + 1)}
+                          className="w-12 h-12 p-0 touch-manipulation"
+                          disabled={set.completed}
+                        >
+                          <Plus className="w-5 h-5" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'weight', set.weight + (weightUnit === 'kg' ? 2.5 : 5))}
-                      className="w-8 h-8 p-0"
-                      disabled={set.completed}
-                      title={`Increase by ${weightUnit === 'kg' ? '2.5' : '5'} ${weightUnit}`}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
+
+                    <div className="text-center">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={() => updateSet(exercise.id, setIndex, 'weight', Math.max(0, set.weight - (weightUnit === 'kg' ? 2.5 : 5)))}
+                          className="w-12 h-12 p-0 touch-manipulation"
+                          disabled={set.completed}
+                        >
+                          <Minus className="w-5 h-5" />
+                        </Button>
+                        <div className="text-center min-w-[100px]">
+                          <div className="text-3xl font-bold text-foreground">
+                            {set.weight}
+                            <span className="text-lg text-muted-foreground ml-1">{weightUnit}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide">WEIGHT</div>
+                        </div>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={() => updateSet(exercise.id, setIndex, 'weight', set.weight + (weightUnit === 'kg' ? 2.5 : 5))}
+                          className="w-12 h-12 p-0 touch-manipulation"
+                          disabled={set.completed}
+                        >
+                          <Plus className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-3">
                   {!set.completed && (
                     <Button
-                      size="sm"
+                      size="lg"
                       onClick={() => completeSet(exercise.id, setIndex)}
-                      className="bg-gradient-success"
+                      className="bg-gradient-success hover:scale-105 transition-transform px-8 py-3 text-lg font-semibold"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
+                      <CheckCircle2 className="w-6 h-6 mr-2" />
+                      Complete
                     </Button>
                   )}
                   
@@ -371,9 +383,9 @@ export function WorkoutSession({
                       size="sm"
                       variant="ghost"
                       onClick={() => removeSet(exercise.id, setIndex)}
-                      className="w-8 h-8 p-0 text-destructive hover:text-destructive"
+                      className="w-10 h-10 p-0 text-destructive hover:text-destructive opacity-60 hover:opacity-100"
                     >
-                      <Minus className="w-3 h-3" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
@@ -382,11 +394,11 @@ export function WorkoutSession({
             
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => addSet(exercise.id)}
-              className="w-full"
+              className="w-full mt-4 py-4 text-lg border-dashed border-2 hover:border-primary/50 hover:bg-primary/5"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-5 h-5 mr-2" />
               Add Set
             </Button>
           </CardContent>
