@@ -293,8 +293,8 @@ export default function WorkoutLog() {
 
           <TabsContent value="current" className="space-y-6 mt-6">
 
-        {/* Show exercise library when starting new workout or returning to add exercise */}
-        {(!workoutStarted || showExerciseLibrary) && (
+        {/* Show exercise library only when explicitly requested */}
+        {showExerciseLibrary && (
           <ExerciseLibrary 
             onSelectExercise={addExerciseFromLibrary}
             onClose={() => {
@@ -306,10 +306,54 @@ export default function WorkoutLog() {
                   } 
                 });
               } else {
-                navigate('/');
+                setShowExerciseLibrary(false);
               }
             }}
           />
+        )}
+
+        {/* Workout Home - Show when not in exercise library */}
+        {!showExerciseLibrary && !workoutStarted && (
+          <div className="space-y-6">
+            {/* Start Workout Section */}
+            <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-primary rounded-full flex items-center justify-center">
+                  <Dumbbell className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-foreground">Ready to Work Out?</h3>
+                  <p className="text-muted-foreground mt-1">Choose exercises and start your session</p>
+                </div>
+                <Button 
+                  onClick={() => setShowExerciseLibrary(true)}
+                  className="bg-gradient-primary text-white hover:opacity-90"
+                  size="lg"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Start New Workout
+                </Button>
+              </div>
+            </Card>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{savedWorkouts.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Workouts</div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">
+                    {savedWorkouts.reduce((acc, w) => acc + w.duration, 0)}min
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Time</div>
+                </div>
+              </Card>
+            </div>
+          </div>
         )}
 
 
