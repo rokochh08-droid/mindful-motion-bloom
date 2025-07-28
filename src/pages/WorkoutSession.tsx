@@ -40,10 +40,11 @@ export default function WorkoutSession() {
   const navigate = useNavigate();
   const location = useLocation();
   const initialExercises = location.state?.exercises || [];
+  const initialWorkoutTime = location.state?.workoutTime || 0;
   
   const [exercises, setExercises] = useState<WorkoutExercise[]>(initialExercises);
   const [isActive, setIsActive] = useState(true);
-  const [workoutTime, setWorkoutTime] = useState(0);
+  const [workoutTime, setWorkoutTime] = useState(initialWorkoutTime);
   const [startTime] = useState(Date.now());
 
   const encouragingMessages = [

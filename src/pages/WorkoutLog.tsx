@@ -109,6 +109,16 @@ export default function WorkoutLog() {
       loadSavedWorkouts(); // Refresh workout history
       toast.success("Welcome back! Your workout has been saved 🎉");
     }
+
+    // Check if returning from workout session to add exercise
+    if (location.state?.returnToSession && location.state?.currentExercises) {
+      setWorkoutData(prev => ({
+        ...prev,
+        exercises: location.state.currentExercises
+      }));
+      setShowExerciseLibrary(true);
+      setWorkoutStarted(true);
+    }
   }, [location.state]);
 
   const loadSavedWorkouts = () => {
@@ -122,12 +132,21 @@ export default function WorkoutLog() {
       sets: [{ reps: 0, weight: 0, completed: false }]
     };
 
-    setWorkoutData(prev => ({
-      ...prev,
-      exercises: [...prev.exercises, newWorkoutExercise]
-    }));
-    
-    setShowExerciseLibrary(false);
+    // If returning to session, add to existing exercises and go back
+    if (location.state?.returnToSession) {
+      const updatedExercises = [...workoutData.exercises, newWorkoutExercise];
+      navigate('/workout/session', { 
+        state: { 
+          exercises: updatedExercises,
+          workoutTime: location.state.currentTime || 0
+        } 
+      });
+      toast.success(`${exercise.name} added to workout`);
+      return;
+    }
+
+    // Otherwise, start new workout session
+    navigate('/workout/session', { state: { exercises: [newWorkoutExercise] } });
     toast.success(`${exercise.name} added to workout`);
   };
 
@@ -255,18 +274,22 @@ export default function WorkoutLog() {
 
           <TabsContent value="current" className="space-y-6 mt-6">
 
-        {/* Always show exercise library when no workout is active */}
-        {!workoutStarted && !showExerciseLibrary && (
+        {/* Show exercise library when starting new workout or returning to add exercise */}
+        {(!workoutStarted || showExerciseLibrary) && (
           <ExerciseLibrary 
-            onSelectExercise={(exercise) => {
-              const newWorkoutExercise: WorkoutExercise = {
-                ...exercise,
-                sets: [{ reps: 0, weight: 0, completed: false }]
-              };
-              // Go directly to workout session
-              navigate('/workout/session', { state: { exercises: [newWorkoutExercise] } });
+            onSelectExercise={addExerciseFromLibrary}
+            onClose={() => {
+              if (location.state?.returnToSession) {
+                navigate('/workout/session', { 
+                  state: { 
+                    exercises: workoutData.exercises,
+                    workoutTime: location.state.currentTime || 0
+                  } 
+                });
+              } else {
+                navigate('/');
+              }
             }}
-            onClose={() => navigate('/')}
           />
         )}
 
