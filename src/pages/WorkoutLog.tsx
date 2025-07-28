@@ -245,7 +245,13 @@ export default function WorkoutLog() {
 
     toast.success("Workout saved successfully! 🎉");
     setShowCompletionModal(false);
-    loadSavedWorkouts(); // Refresh the workout history
+    
+    // Navigate to celebration page
+    navigate('/workout/celebration', { 
+      state: { 
+        workoutData: workoutToSave 
+      } 
+    });
     
     // Reset form
     setWorkoutData({
