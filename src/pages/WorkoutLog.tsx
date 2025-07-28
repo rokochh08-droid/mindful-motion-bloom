@@ -44,6 +44,7 @@ interface WorkoutExercise extends Exercise {
 }
 
 interface WorkoutData {
+  name?: string;
   exercises: WorkoutExercise[];
   moodBefore: number;
   moodAfter: number;
@@ -161,14 +162,27 @@ export default function WorkoutLog() {
         {/* Pre-Workout Setup - Only show if workout hasn't started */}
         {!workoutStarted && (
           <>
-            <Card className="shadow-card">
+            <Card className="shadow-card border-primary/10 bg-gradient-calm/10">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Target className="w-5 h-5 mr-2 text-primary" />
+                <CardTitle className="text-lg flex items-center text-primary">
+                  <Target className="w-5 h-5 mr-2" />
                   Before Your Workout
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="workout-name" className="text-sm font-medium text-primary">
+                    Workout Name (Optional)
+                  </Label>
+                  <Input
+                    id="workout-name"
+                    type="text"
+                    placeholder="e.g., Morning Push Workout, Leg Day..."
+                    value={workoutData.name || ""}
+                    onChange={(e) => setWorkoutData(prev => ({ ...prev, name: e.target.value }))}
+                    className="mt-1 rounded-xl border-primary/20"
+                  />
+                </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Mood</Label>

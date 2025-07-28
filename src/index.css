@@ -17,34 +17,34 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 25%;
 
-    /* Calming primary - soft teal */
-    --primary: 185 60% 45%;
+    /* Warm, welcoming primary - soft sage green */
+    --primary: 155 45% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 185 60% 85%;
-    --primary-dark: 185 60% 35%;
+    --primary-light: 155 45% 85%;
+    --primary-dark: 155 45% 40%;
 
-    /* Supportive secondary - warm sage */
-    --secondary: 145 25% 85%;
-    --secondary-foreground: 145 50% 25%;
-    --secondary-dark: 145 25% 60%;
+    /* Supportive secondary - warm beige */
+    --secondary: 35 20% 88%;
+    --secondary-foreground: 35 30% 35%;
+    --secondary-dark: 35 20% 70%;
 
-    /* Encouraging accent - gentle orange */
-    --accent: 25 75% 60%;
+    /* Encouraging accent - warm coral */
+    --accent: 15 70% 65%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 25 75% 85%;
+    --accent-light: 15 70% 85%;
 
     /* Muted tones */
     --muted: 210 20% 94%;
     --muted-foreground: 215 15% 45%;
 
     /* Success - growth green */
-    --success: 145 65% 45%;
+    --success: 140 55% 55%;
     --success-foreground: 0 0% 100%;
-    --success-light: 145 65% 85%;
+    --success-light: 140 55% 85%;
 
-    /* Warning - gentle yellow */
-    --warning: 45 85% 60%;
-    --warning-foreground: 45 85% 15%;
+    /* Warning - gentle amber */
+    --warning: 40 80% 65%;
+    --warning-foreground: 40 80% 20%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
@@ -53,7 +53,7 @@ All colors MUST be HSL.
     --input: 210 20% 90%;
     --ring: 185 60% 45%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
@@ -61,10 +61,11 @@ All colors MUST be HSL.
     --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(25 75% 50%));
     --gradient-calm: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--secondary)));
     
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -2px hsl(var(--primary) / 0.1);
-    --shadow-card: 0 2px 12px -4px hsl(215 25% 25% / 0.1);
-    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.2);
+    /* Shadows - warmer and softer */
+    --shadow-soft: 0 8px 32px -8px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 4px 20px -4px hsl(35 20% 50% / 0.08);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.25);
+    --shadow-gentle: 0 2px 8px -2px hsl(35 20% 50% / 0.06);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

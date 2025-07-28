@@ -276,7 +276,7 @@ export function WorkoutSession({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateSet(exercise.id, setIndex, 'reps', Math.max(0, set.reps - 1))}
+                      onClick={() => updateSet(exercise.id, setIndex, 'reps', Math.max(1, set.reps - 1))}
                       className="w-8 h-8 p-0"
                       disabled={set.completed}
                     >
@@ -285,7 +285,7 @@ export function WorkoutSession({
                     <Input
                       type="number"
                       value={set.reps}
-                      onChange={(e) => updateSet(exercise.id, setIndex, 'reps', parseInt(e.target.value) || 0)}
+                      onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-16 text-center"
                       disabled={set.completed}
                     />
@@ -319,7 +319,7 @@ export function WorkoutSession({
                         type="number"
                         step={weightUnit === 'kg' ? '2.5' : '5'}
                         value={set.weight}
-                        onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
                         className="w-20 text-center pr-8"
                         disabled={set.completed}
                         placeholder="0"
