@@ -248,7 +248,7 @@ export function WorkoutSession({
                           type="number"
                           value={set.reps}
                           onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-20 h-16 text-center text-4xl font-light border-none bg-transparent p-0 focus:ring-0"
+                          className="w-20 h-14 text-center text-3xl font-semibold border-none bg-transparent p-1 focus:ring-0"
                           min="1"
                           disabled={set.completed}
                         />
@@ -284,12 +284,12 @@ export function WorkoutSession({
                             type="number"
                             value={set.weight}
                             onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
-                            className="w-24 h-16 text-center text-4xl font-light border-none bg-transparent p-0 focus:ring-0"
+                            className="w-24 h-14 text-center text-3xl font-semibold border-none bg-transparent p-1 focus:ring-0"
                             min="0"
                             step={weightUnit === 'kg' ? '2.5' : '5'}
                             disabled={set.completed}
                           />
-                          <span className="text-2xl text-muted-foreground ml-1 mb-2">{weightUnit}</span>
+                          <span className="text-xl text-muted-foreground ml-1 mb-1">{weightUnit}</span>
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">WEIGHT</div>
                       </div>
@@ -306,9 +306,9 @@ export function WorkoutSession({
                   </div>
                 </div>
 
-                {/* Complete Set Button */}
-                {!set.completed && (
-                  <div className="text-center">
+                {/* Remove Set Button and Complete Set Button */}
+                <div className="text-center space-y-4">
+                  {!set.completed && (
                     <Button
                       size="lg"
                       onClick={() => completeSet(exercise.id, setIndex)}
@@ -316,12 +316,9 @@ export function WorkoutSession({
                     >
                       Complete Set
                     </Button>
-                  </div>
-                )}
-
-                {/* Remove Set */}
-                {exercise.sets.length > 1 && (
-                  <div className="text-center">
+                  )}
+                  
+                  {exercise.sets.length > 1 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -330,8 +327,8 @@ export function WorkoutSession({
                     >
                       Remove Set
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
             

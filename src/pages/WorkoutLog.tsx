@@ -104,6 +104,19 @@ export default function WorkoutLog() {
   useEffect(() => {
     loadSavedWorkouts();
     
+    // Check if finishing workout from session
+    if (location.state?.finishWorkout && location.state?.workoutData) {
+      const sessionData = location.state.workoutData;
+      setWorkoutData(prev => ({
+        ...prev,
+        exercises: sessionData.exercises,
+        duration: Math.floor(sessionData.duration / 60), // Convert to minutes
+        date: new Date().toISOString().split('T')[0]
+      }));
+      setShowCompletionModal(true);
+      return;
+    }
+
     // Check if returning from workout session with completed workout
     if (location.state?.workoutCompleted) {
       loadSavedWorkouts(); // Refresh workout history

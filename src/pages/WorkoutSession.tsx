@@ -115,19 +115,17 @@ export default function WorkoutSession() {
   };
 
   const handleFinishWorkout = () => {
-    const workoutData = {
-      exercises,
-      duration: workoutTime,
-      completedAt: new Date().toISOString(),
-      startedAt: new Date(startTime).toISOString()
-    };
-
-    const savedWorkouts = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-    savedWorkouts.push(workoutData);
-    localStorage.setItem('workoutHistory', JSON.stringify(savedWorkouts));
-
-    toast.success("Workout completed! Amazing work! 🎉");
-    navigate('/workout', { state: { workoutCompleted: true } });
+    // Navigate to workout log with completion data
+    navigate('/workout', { 
+      state: { 
+        finishWorkout: true,
+        workoutData: {
+          exercises,
+          duration: workoutTime,
+          startedAt: new Date(startTime).toISOString()
+        }
+      } 
+    });
   };
 
   const handleAddExercise = () => {
