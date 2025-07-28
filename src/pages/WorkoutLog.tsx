@@ -134,6 +134,14 @@ export default function WorkoutLog() {
     }
 
     try {
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        toast.error("Please sign in to save your workout");
+        return;
+      }
+
       const { error } = await supabase
         .from('workouts')
         .insert({
@@ -146,11 +154,15 @@ export default function WorkoutLog() {
           difficulty: workoutData.difficulty,
           duration: workoutData.duration,
           notes: workoutData.notes || null,
-          user_id: (await supabase.auth.getUser()).data.user?.id
+          user_id: user.id
         });
 
       if (error) {
-        toast.error("Failed to save workout");
+        if (error.code === '42501') {
+          toast.error("Please sign in to save your workout");
+        } else {
+          toast.error("Failed to save workout");
+        }
         console.error(error);
         return;
       }
@@ -237,18 +249,27 @@ export default function WorkoutLog() {
               </CardContent>
             </Card>
 
-            {/* Exercise Library Button */}
-            <Card className="shadow-card">
-              <CardContent className="p-4">
-                <Button 
-                  onClick={() => setShowExerciseLibrary(true)} 
-                  className="w-full bg-gradient-primary h-12"
-                >
-                  <Dumbbell className="w-5 h-5 mr-2" />
-                  Browse Exercise Library
-                </Button>
-              </CardContent>
-            </Card>
+        {/* Start Workout Button */}
+        <Card className="shadow-card">
+          <CardContent className="p-6 text-center">
+            <div className="space-y-4">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-primary/10 rounded-full">
+                <Play className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Ready to Begin?</h3>
+                <p className="text-muted-foreground text-sm mb-4">Start by adding your first exercise</p>
+              </div>
+              <Button 
+                onClick={() => setShowExerciseLibrary(true)} 
+                className="w-full bg-gradient-primary h-12"
+              >
+                <Dumbbell className="w-5 h-5 mr-2" />
+                Start Workout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
           </>
         )}
 
@@ -289,7 +310,7 @@ export default function WorkoutLog() {
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl font-bold text-warm-800 flex items-center">
                   <Smile className="w-6 h-6 mr-2 text-success" />
-                  Amazing Work! 
+                  Great Session! 
                 </DialogTitle>
                 <Button
                   variant="ghost"
@@ -300,7 +321,7 @@ export default function WorkoutLog() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="text-warm-600 mt-1">Let's capture this workout for your journey</p>
+              <p className="text-warm-600 mt-1">Let's capture this workout for your journey.</p>
             </DialogHeader>
             
             <div className="space-y-6 p-6">
@@ -416,7 +437,7 @@ export default function WorkoutLog() {
                 disabled={!workoutData.name?.trim()}
               >
                 <Save className="w-5 h-5 mr-2" />
-                Save This Amazing Workout! 🎉
+                Save Workout
               </Button>
             </div>
           </DialogContent>
