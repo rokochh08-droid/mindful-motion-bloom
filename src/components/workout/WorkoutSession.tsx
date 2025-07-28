@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { RestTimer } from "./RestTimer";
+import { MeditationRestTimer } from "./MeditationRestTimer";
 
 interface Exercise {
   id: string;
@@ -68,6 +69,8 @@ export function WorkoutSession({
   const [currentSet, setCurrentSet] = useState(0);
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lb'>('kg');
   const [showRestTimer, setShowRestTimer] = useState(false);
+  const [showMeditationTimer, setShowMeditationTimer] = useState(false);
+  const [meditationTimerSeconds, setMeditationTimerSeconds] = useState(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -156,8 +159,18 @@ export function WorkoutSession({
   };
 
   const handleStartRest = (seconds: number) => {
-    setRestTimer(seconds);
-    toast.success(`Rest timer started: ${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`);
+    setMeditationTimerSeconds(seconds);
+    setShowMeditationTimer(true);
+    setShowRestTimer(false);
+  };
+
+  const handleRestComplete = () => {
+    setShowMeditationTimer(false);
+    toast.success("Rest time complete! 💪");
+  };
+
+  const handleExitRest = () => {
+    setShowMeditationTimer(false);
   };
 
   const getCompletionProgress = () => {
@@ -412,6 +425,15 @@ export function WorkoutSession({
         onClose={() => setShowRestTimer(false)}
         onStartRest={handleStartRest}
       />
+
+      {/* Meditation Rest Timer */}
+      {showMeditationTimer && (
+        <MeditationRestTimer
+          initialSeconds={meditationTimerSeconds}
+          onComplete={handleRestComplete}
+          onExit={handleExitRest}
+        />
+      )}
     </div>
   );
 }
