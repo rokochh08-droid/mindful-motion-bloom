@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,8 @@ interface WorkoutData {
 }
 
 export default function WorkoutLog() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [workoutData, setWorkoutData] = useState<WorkoutData>({
     exercises: [],
     moodBefore: 5,
@@ -100,7 +103,13 @@ export default function WorkoutLog() {
 
   useEffect(() => {
     loadSavedWorkouts();
-  }, []);
+    
+    // Check if returning from workout session with completed workout
+    if (location.state?.workoutCompleted) {
+      loadSavedWorkouts(); // Refresh workout history
+      toast.success("Welcome back! Your workout has been saved 🎉");
+    }
+  }, [location.state]);
 
   const loadSavedWorkouts = () => {
     const saved = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
@@ -307,11 +316,17 @@ export default function WorkoutLog() {
                 <p className="text-muted-foreground text-sm mb-4">Start by adding your first exercise</p>
               </div>
               <Button 
-                onClick={() => setShowExerciseLibrary(true)} 
+                onClick={() => {
+                  if (workoutData.exercises.length === 0) {
+                    setShowExerciseLibrary(true);
+                  } else {
+                    navigate('/workout/session', { state: { exercises: workoutData.exercises } });
+                  }
+                }} 
                 className="w-full bg-gradient-primary h-12"
               >
                 <Dumbbell className="w-5 h-5 mr-2" />
-                Start Workout
+                {workoutData.exercises.length === 0 ? 'Add Exercise' : 'Start Workout'}
               </Button>
             </div>
           </CardContent>
@@ -327,16 +342,39 @@ export default function WorkoutLog() {
           />
         )}
 
-        {/* Workout Session */}
-        <WorkoutSession
-          exercises={workoutData.exercises}
-          isActive={workoutActive}
-          onUpdateExercises={updateExercises}
-          onStartWorkout={startWorkout}
-          onPauseWorkout={pauseWorkout}
-          onFinishWorkout={finishWorkout}
-          onAddExercise={() => setShowExerciseLibrary(true)}
-        />
+        {/* Exercise Preview - Only show if exercises added but workout not started */}
+        {workoutData.exercises.length > 0 && !workoutStarted && (
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="text-lg text-primary flex items-center">
+                <Dumbbell className="w-5 h-5 mr-2" />
+                Workout Preview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {workoutData.exercises.map((exercise, idx) => (
+                <div key={exercise.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div>
+                    <span className="font-medium text-foreground">{exercise.name}</span>
+                    <div className="text-xs text-muted-foreground">
+                      {exercise.sets.length} sets planned
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {exercise.bodyPart}
+                  </Badge>
+                </div>
+              ))}
+              <Button 
+                onClick={() => navigate('/workout/session', { state: { exercises: workoutData.exercises } })}
+                className="w-full bg-gradient-success h-12 mt-4"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Start Workout Session
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Save Button */}
         {workoutData.exercises.length > 0 && (

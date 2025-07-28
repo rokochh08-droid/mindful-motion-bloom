@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Welcome from "./pages/onboarding/Welcome";
 import Goals from "./pages/onboarding/Goals";
 import WorkoutLog from "./pages/WorkoutLog";
+import WorkoutSession from "./pages/WorkoutSession";
 import WorkoutHistory from "./pages/WorkoutHistory";
 import AICoach from "./pages/AICoach";
 import Progress from "./pages/Progress";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/onboarding/goals" element={<Goals />} />
           <Route path="/workout" element={<WorkoutLog />} />
+          <Route path="/workout/session" element={<WorkoutSession />} />
           <Route path="/history" element={<WorkoutHistory />} />
           <Route path="/coach" element={<AICoach />} />
           <Route path="/progress" element={<Progress />} />
