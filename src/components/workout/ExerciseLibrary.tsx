@@ -250,19 +250,19 @@ export function ExerciseLibrary({ onSelectExercise, onClose }: ExerciseLibraryPr
               </div>
             )}
 
-            <Tabs defaultValue="All" className="w-full">
+            <Tabs value={selectedBodyPart} onValueChange={setSelectedBodyPart} className="w-full">
               <TabsList className="grid w-full grid-cols-8">
-                <TabsTrigger value="All" onClick={() => setSelectedBodyPart("All")}>All</TabsTrigger>
-                <TabsTrigger value="Chest" onClick={() => setSelectedBodyPart("Chest")}>Chest</TabsTrigger>
-                <TabsTrigger value="Back" onClick={() => setSelectedBodyPart("Back")}>Back</TabsTrigger>
-                <TabsTrigger value="Shoulders" onClick={() => setSelectedBodyPart("Shoulders")}>Shoulders</TabsTrigger>
-                <TabsTrigger value="Arms" onClick={() => setSelectedBodyPart("Arms")}>Arms</TabsTrigger>
-                <TabsTrigger value="Legs" onClick={() => setSelectedBodyPart("Legs")}>Legs</TabsTrigger>
-                <TabsTrigger value="Core" onClick={() => setSelectedBodyPart("Core")}>Core</TabsTrigger>
-                <TabsTrigger value="Full Body" onClick={() => setSelectedBodyPart("Full Body")}>Cardio</TabsTrigger>
+                <TabsTrigger value="All">All</TabsTrigger>
+                <TabsTrigger value="Chest">Chest</TabsTrigger>
+                <TabsTrigger value="Back">Back</TabsTrigger>
+                <TabsTrigger value="Shoulders">Shoulders</TabsTrigger>
+                <TabsTrigger value="Arms">Arms</TabsTrigger>
+                <TabsTrigger value="Legs">Legs</TabsTrigger>
+                <TabsTrigger value="Core">Core</TabsTrigger>
+                <TabsTrigger value="Full Body">Cardio</TabsTrigger>
               </TabsList>
 
-              <TabsContent value={selectedBodyPart} className="mt-4">
+              <div className="mt-4">
                 <ScrollArea className="h-96">
                   <div className="space-y-2">
                     {filteredExercises.length === 0 ? (
@@ -306,7 +306,7 @@ export function ExerciseLibrary({ onSelectExercise, onClose }: ExerciseLibraryPr
                     )}
                   </div>
                 </ScrollArea>
-              </TabsContent>
+              </div>
             </Tabs>
           </div>
         </CardContent>

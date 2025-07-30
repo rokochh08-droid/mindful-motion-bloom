@@ -124,6 +124,7 @@ export default function Community() {
   const [selectedTab, setSelectedTab] = useState("feed");
   const [newPost, setNewPost] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
@@ -190,14 +191,28 @@ export default function Community() {
                           rows={4}
                           className="resize-none"
                         />
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setNewPost("")}>
-                            Cancel
-                          </Button>
-                          <Button onClick={handleCreatePost} disabled={!newPost.trim()}>
-                            <Plus className="w-4 h-4 mr-2" />
-                            Share Post
-                          </Button>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id="anonymous"
+                              checked={isAnonymous}
+                              onChange={(e) => setIsAnonymous(e.target.checked)}
+                              className="rounded"
+                            />
+                            <label htmlFor="anonymous" className="text-sm text-muted-foreground">
+                              Post anonymously
+                            </label>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" onClick={() => setNewPost("")}>
+                              Cancel
+                            </Button>
+                            <Button onClick={handleCreatePost} disabled={!newPost.trim()}>
+                              <Plus className="w-4 h-4 mr-2" />
+                              Share Post
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </DialogContent>
