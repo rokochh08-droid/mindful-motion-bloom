@@ -7,13 +7,17 @@ import {
   Activity, 
   Brain, 
   Calendar, 
-  Flame, 
   Plus, 
   Sparkles, 
   TrendingUp,
-  Heart
+  Heart,
+  Target,
+  Trophy
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { GoalsSection } from "@/components/dashboard/GoalsSection";
+import { StreakTracker } from "@/components/dashboard/StreakTracker";
+import { MotivationalCard } from "@/components/dashboard/MotivationalCard";
 
 interface DashboardStats {
   streakDays: number;
@@ -58,54 +62,64 @@ export default function Dashboard() {
     <Layout>
       <div className="p-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Good morning! 👋</h1>
             <p className="text-muted-foreground">Ready to continue your journey?</p>
           </div>
-          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-            <Heart className="w-6 h-6 text-primary-foreground" />
+          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
+            <Heart className="w-6 h-6 text-primary-foreground animate-pulse" />
           </div>
         </div>
+
+        {/* Streak Tracker */}
+        <StreakTracker />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Button 
             onClick={() => navigate('/workout')}
-            className="h-16 bg-gradient-primary hover:shadow-glow transition-smooth"
+            className="h-16 bg-gradient-primary hover:shadow-glow transition-smooth group"
           >
-            <Plus className="w-5 h-5 mr-2" />
-            Log Workout
+            <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+            Start Workout
           </Button>
           <Button 
             onClick={() => navigate('/coach')}
             variant="outline"
-            className="h-16 border-primary text-primary hover:bg-primary-light"
+            className="h-16 border-primary/20 text-primary hover:bg-primary/5 hover:border-primary hover:shadow-soft transition-smooth group"
           >
-            <Brain className="w-5 h-5 mr-2" />
-            Ask Coach
+            <Brain className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+            AI Coach
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="shadow-card">
+        {/* Goals Section */}
+        <GoalsSection />
+
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="shadow-card hover:shadow-soft transition-smooth">
             <CardContent className="p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Flame className="w-5 h-5 text-accent mr-1" />
-                <span className="text-2xl font-bold text-foreground">{stats.streakDays}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Day Streak</p>
+              <Activity className="w-6 h-6 mx-auto mb-2 text-success" />
+              <div className="text-lg font-bold text-foreground">{stats.weeklyWorkouts}</div>
+              <div className="text-xs text-muted-foreground">This Week</div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-card">
+          <Card className="shadow-card hover:shadow-soft transition-smooth">
             <CardContent className="p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Activity className="w-5 h-5 text-success mr-1" />
-                <span className="text-2xl font-bold text-foreground">{stats.weeklyWorkouts}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">This Week</p>
+              <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <div className="text-lg font-bold text-foreground">+15%</div>
+              <div className="text-xs text-muted-foreground">Strength Up</div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card hover:shadow-soft transition-smooth">
+            <CardContent className="p-4 text-center">
+              <Trophy className="w-6 h-6 mx-auto mb-2 text-accent" />
+              <div className="text-lg font-bold text-foreground">92%</div>
+              <div className="text-xs text-muted-foreground">Consistency</div>
             </CardContent>
           </Card>
         </div>
@@ -171,49 +185,33 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* AI Coach Suggestion */}
+        {/* Motivational Card */}
+        <MotivationalCard />
+
+        {/* AI Coach Insight */}
         <Card className="shadow-card bg-gradient-calm border-0">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center shadow-soft">
                 <Brain className="w-5 h-5 text-primary-foreground" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-foreground mb-1">Today's Suggestion</h3>
+                <h3 className="font-medium text-foreground mb-1">AI Coach Insight</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  You've been consistent this week! Consider a lighter activity today 
-                  like yoga or a walk to maintain momentum without overdoing it.
+                  Your consistency is impressive! Based on your progress, I recommend adding 
+                  some mobility work to enhance recovery and prevent injury.
                 </p>
                 <Button 
                   size="sm" 
                   onClick={() => navigate('/coach')}
-                  className="bg-primary hover:bg-primary-dark"
+                  className="bg-primary hover:bg-primary-dark transition-smooth"
                 >
-                  Chat with Coach
+                  Get Personalized Plan
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 bg-card rounded-lg shadow-soft">
-            <TrendingUp className="w-5 h-5 mx-auto mb-1 text-success" />
-            <div className="text-lg font-bold text-foreground">15%</div>
-            <div className="text-xs text-muted-foreground">Strength Up</div>
-          </div>
-          <div className="p-3 bg-card rounded-lg shadow-soft">
-            <Heart className="w-5 h-5 mx-auto mb-1 text-accent" />
-            <div className="text-lg font-bold text-foreground">8.5</div>
-            <div className="text-xs text-muted-foreground">Happiness</div>
-          </div>
-          <div className="p-3 bg-card rounded-lg shadow-soft">
-            <Sparkles className="w-5 h-5 mx-auto mb-1 text-primary" />
-            <div className="text-lg font-bold text-foreground">92%</div>
-            <div className="text-xs text-muted-foreground">Consistency</div>
-          </div>
-        </div>
       </div>
     </Layout>
   );
