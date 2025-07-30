@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
 import { ExerciseLibrary } from "@/components/workout/ExerciseLibrary";
 import { WorkoutSession } from "@/components/workout/WorkoutSession";
+import { WorkoutTemplates } from "@/components/workout/WorkoutTemplates";
 import { 
   Plus, 
   Save, 
@@ -94,6 +95,7 @@ export default function WorkoutLog() {
   });
 
   const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
+  const [showWorkoutTemplates, setShowWorkoutTemplates] = useState(false);
   const [workoutActive, setWorkoutActive] = useState(false);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -161,6 +163,11 @@ export default function WorkoutLog() {
     // Otherwise, start new workout session
     navigate('/workout/session', { state: { exercises: [newWorkoutExercise] } });
     toast.success(`${exercise.name} added to workout`);
+  };
+
+  const startWorkoutFromTemplate = (exercises: any[]) => {
+    navigate('/workout/session', { state: { exercises } });
+    toast.success("Template workout started! 💪");
   };
 
   const updateExercises = (updatedExercises: WorkoutExercise[]) => {
@@ -293,6 +300,14 @@ export default function WorkoutLog() {
 
           <TabsContent value="current" className="space-y-6 mt-6">
 
+        {/* Show workout templates when requested */}
+        {showWorkoutTemplates && (
+          <WorkoutTemplates
+            onSelectTemplate={startWorkoutFromTemplate}
+            onClose={() => setShowWorkoutTemplates(false)}
+          />
+        )}
+
         {/* Show exercise library only when explicitly requested */}
         {showExerciseLibrary && (
           <ExerciseLibrary 
@@ -312,8 +327,8 @@ export default function WorkoutLog() {
           />
         )}
 
-        {/* Workout Home - Show when not in exercise library */}
-        {!showExerciseLibrary && !workoutStarted && (
+        {/* Workout Home - Show when not in exercise library or templates */}
+        {!showExerciseLibrary && !showWorkoutTemplates && !workoutStarted && (
           <div className="space-y-6">
             {/* Start Workout Section */}
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
@@ -325,14 +340,25 @@ export default function WorkoutLog() {
                   <h3 className="text-xl font-semibold text-foreground">Ready to Work Out?</h3>
                   <p className="text-muted-foreground mt-1">Choose exercises and start your session</p>
                 </div>
-                <Button 
-                  onClick={() => setShowExerciseLibrary(true)}
-                  className="bg-gradient-primary text-white hover:opacity-90"
-                  size="lg"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Start New Workout
-                </Button>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => setShowWorkoutTemplates(true)}
+                    className="bg-gradient-primary text-white hover:opacity-90 w-full"
+                    size="lg"
+                  >
+                    <Dumbbell className="w-5 h-5 mr-2" />
+                    Use Template
+                  </Button>
+                  <Button 
+                    onClick={() => setShowExerciseLibrary(true)}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Build Custom Workout
+                  </Button>
+                </div>
               </div>
             </Card>
 
@@ -378,10 +404,10 @@ export default function WorkoutLog() {
               <p className="text-warm-600 mt-1">Let's capture this workout for your journey.</p>
             </DialogHeader>
             
-            <div className="space-y-6 p-6">
+            <div className="space-y-6 p-6 font-playful">
               {/* Workout Name */}
               <div className="space-y-2">
-                <Label htmlFor="workout-name-final" className="text-sm font-medium text-warm-700">
+                <Label htmlFor="workout-name-final" className="text-sm font-medium text-warm-700 font-playful">
                   What should we call this workout? ✨
                 </Label>
                 <Input
@@ -390,17 +416,17 @@ export default function WorkoutLog() {
                   placeholder="e.g., Morning Push Session, Beast Mode Friday..."
                   value={workoutData.name || ""}
                   onChange={(e) => setWorkoutData(prev => ({ ...prev, name: e.target.value }))}
-                  className="rounded-xl border-warm-200 bg-white/70 focus:border-warm-400 text-warm-800"
+                  className="rounded-xl border-warm-200 bg-white/70 focus:border-warm-400 text-warm-800 font-playful"
                 />
               </div>
 
               {/* Mood After */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-warm-700">How are you feeling now?</Label>
+                  <Label className="text-sm font-medium text-warm-700 font-playful">How are you feeling now?</Label>
                   <div className="flex items-center space-x-2">
                     {getMoodIcon(workoutData.moodAfter)}
-                    <span className="text-sm font-medium text-warm-800">{workoutData.moodAfter}/10</span>
+                    <span className="text-sm font-medium text-warm-800 font-playful">{workoutData.moodAfter}/10</span>
                   </div>
                 </div>
                 <Slider
@@ -416,10 +442,10 @@ export default function WorkoutLog() {
               {/* Energy After */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-warm-700">Energy Level</Label>
+                  <Label className="text-sm font-medium text-warm-700 font-playful">Energy Level</Label>
                   <div className="flex items-center space-x-2">
                     <Zap className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium text-warm-800">{workoutData.energyAfter}/10</span>
+                    <span className="text-sm font-medium text-warm-800 font-playful">{workoutData.energyAfter}/10</span>
                   </div>
                 </div>
                 <Slider
@@ -435,8 +461,8 @@ export default function WorkoutLog() {
               {/* Difficulty */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-warm-700">How challenging was this?</Label>
-                  <span className="text-sm font-medium text-warm-800">{workoutData.difficulty}/10</span>
+                  <Label className="text-sm font-medium text-warm-700 font-playful">How challenging was this?</Label>
+                  <span className="text-sm font-medium text-warm-800 font-playful">{workoutData.difficulty}/10</span>
                 </div>
                 <Slider
                   value={[workoutData.difficulty]}
@@ -446,7 +472,7 @@ export default function WorkoutLog() {
                   step={1}
                   className="mb-2"
                 />
-                <div className="flex justify-between text-xs text-warm-600">
+                <div className="flex justify-between text-xs text-warm-600 font-playful">
                   <span>Too Easy</span>
                   <span>Perfect</span>
                   <span>Too Hard</span>
@@ -455,7 +481,7 @@ export default function WorkoutLog() {
 
               {/* Duration */}
               <div className="space-y-2">
-                <Label htmlFor="duration" className="text-sm font-medium text-warm-700 flex items-center">
+                <Label htmlFor="duration" className="text-sm font-medium text-warm-700 flex items-center font-playful">
                   <Clock className="w-4 h-4 mr-2" />
                   How long did this take? (minutes)
                 </Label>
@@ -471,7 +497,7 @@ export default function WorkoutLog() {
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes" className="text-sm font-medium text-warm-700">
+                <Label htmlFor="notes" className="text-sm font-medium text-warm-700 font-playful">
                   Any thoughts to remember? 💭
                 </Label>
                 <Textarea

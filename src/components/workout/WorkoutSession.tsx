@@ -249,7 +249,7 @@ export function WorkoutSession({
                             type="number"
                             value={set.reps}
                             onChange={(e) => updateSet(exercise.id, setIndex, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
-                            className="w-full h-full text-center text-3xl font-light bg-transparent border-0 outline-none focus:ring-0"
+                            className="w-full h-full text-center text-2xl font-light bg-transparent border-0 outline-none focus:ring-0"
                             min="1"
                             disabled={set.completed}
                           />
@@ -281,17 +281,17 @@ export function WorkoutSession({
                         <Minus className="w-5 h-5" />
                       </Button>
                       <div className="text-center">
-                        <div className="w-24 h-16 flex items-center justify-center bg-muted/30 rounded-lg border-0 relative">
+                        <div className="w-28 h-16 flex items-center justify-center bg-muted/30 rounded-lg border-0 relative">
                           <input
                             type="number"
                             value={set.weight}
                             onChange={(e) => updateSet(exercise.id, setIndex, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
-                            className="w-full h-full text-center text-3xl font-light bg-transparent border-0 outline-none focus:ring-0 pr-8"
+                            className="w-full h-full text-center text-xl font-light bg-transparent border-0 outline-none focus:ring-0 pr-8"
                             min="0"
                             step={weightUnit === 'kg' ? '2.5' : '5'}
                             disabled={set.completed}
                           />
-                          <span className="absolute right-2 text-lg text-muted-foreground font-light">{weightUnit}</span>
+                          <span className="absolute right-2 text-sm text-muted-foreground font-light">{weightUnit}</span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-2 font-medium tracking-wide">WEIGHT</div>
                       </div>
@@ -335,13 +335,13 @@ export function WorkoutSession({
             ))}
             
             {/* Add Set */}
-            <div className="text-center pt-6">
+            <div className="text-center pt-12">
               <Button
                 variant="outline"
                 onClick={() => addSet(exercise.id)}
-                className="h-12 px-8 text-base rounded-xl"
+                className="h-10 px-6 text-sm rounded-xl"
               >
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="w-4 h-4 mr-2" />
                 Add Set
               </Button>
             </div>

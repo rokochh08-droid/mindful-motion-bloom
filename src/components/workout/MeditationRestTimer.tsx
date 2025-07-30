@@ -45,7 +45,7 @@ export function MeditationRestTimer({ initialSeconds, onComplete, onExit }: Medi
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-background z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-gradient-to-br from-warm-50/90 to-green-50/90" />
       
       <div className="relative z-10 text-center space-y-8 p-8">

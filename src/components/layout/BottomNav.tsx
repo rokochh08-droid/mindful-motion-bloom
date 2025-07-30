@@ -1,4 +1,4 @@
-import { Home, Activity, Brain, TrendingUp, User } from "lucide-react";
+import { Home, Activity, Brain, TrendingUp, User, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +7,7 @@ const navItems = [
   { path: "/workout", icon: Activity, label: "Workout" },
   { path: "/coach", icon: Brain, label: "AI Coach" },
   { path: "/progress", icon: TrendingUp, label: "Progress" },
+  { path: "/community", icon: Users, label: "Community" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
 
