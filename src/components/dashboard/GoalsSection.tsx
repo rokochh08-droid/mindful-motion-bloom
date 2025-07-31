@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Target, Trophy, CheckCircle, Circle, Trash2 } from "lucide-react";
+import { Plus, Target, Trophy, CheckCircle, Circle, Trash2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Goal {
@@ -277,30 +277,53 @@ export function GoalsSection() {
                   <Progress value={progress} className="h-2" />
                 </div>
                 
-                {!isCompleted && (
-                  <div className="flex space-x-2 mt-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateGoalProgress(goal.id, 1)}
-                      className="flex-1 text-xs"
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      +1
-                    </Button>
-                    {goal.target > 10 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateGoalProgress(goal.id, 5)}
-                        className="flex-1 text-xs"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        +5
-                      </Button>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex space-x-2">
+                    {!isCompleted && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateGoalProgress(goal.id, 1)}
+                          className="text-xs hover:bg-success/10 hover:border-success transition-smooth"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          +1
+                        </Button>
+                        {goal.target > 10 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateGoalProgress(goal.id, 5)}
+                            className="text-xs hover:bg-success/10 hover:border-success transition-smooth"
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            +5
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
-                )}
+                  
+                  {/* Quick Complete Button */}
+                  {!isCompleted && goal.current < goal.target && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateGoalProgress(goal.id, goal.target - goal.current)}
+                      className="bg-success hover:bg-success/80 text-white text-xs h-8 px-3 hover:scale-105 transition-all duration-200 shadow-soft hover:shadow-glow"
+                    >
+                      <Check className="w-3 h-3 mr-1" />
+                      Complete
+                    </Button>
+                  )}
+                  
+                  {isCompleted && (
+                    <div className="flex items-center text-success text-xs font-medium">
+                      <Trophy className="w-4 h-4 mr-1" />
+                      Completed!
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })

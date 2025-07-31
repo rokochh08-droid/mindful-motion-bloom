@@ -153,37 +153,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Weekly Progress */}
-        <Card className="shadow-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg">
-              <Calendar className="w-5 h-5 mr-2 text-primary" />
-              This Week's Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm text-muted-foreground">Weekly Goal: 4 workouts</span>
-              <span className="text-sm font-medium text-success">{stats.weeklyWorkouts}/4</span>
-            </div>
-            <Progress value={(stats.weeklyWorkouts / 4) * 100} className="h-3 mb-4" />
-            
-            <div className="grid grid-cols-7 gap-1">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-                <div key={day} className="text-center">
-                  <div className="text-xs text-muted-foreground mb-1">{day}</div>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
-                    index < stats.weeklyWorkouts 
-                      ? 'bg-success text-success-foreground' 
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {index < stats.weeklyWorkouts ? '✓' : ''}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Motivational Card */}
         <MotivationalCard />

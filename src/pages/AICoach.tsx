@@ -191,6 +191,24 @@ export default function AICoach() {
       return trainingResponse;
     }
     
+    // Try AI coach API first
+    try {
+      const userContext = `Recent streak: ${JSON.parse(localStorage.getItem('streakData') || '{}').currentStreak || 0} days. User goals: ${JSON.parse(localStorage.getItem('userGoals') || '[]').map((g: any) => g.title).join(', ')}`;
+      
+      const response = await supabase.functions.invoke('ai-coach', {
+        body: { 
+          message: userInput,
+          userContext: userContext
+        }
+      });
+
+      if (response.data && response.data.response) {
+        return response.data.response;
+      }
+    } catch (error) {
+      console.log('AI Coach API unavailable, falling back to default responses:', error);
+    }
+    
     // Fall back to default responses
     const input = userInput.toLowerCase();
     

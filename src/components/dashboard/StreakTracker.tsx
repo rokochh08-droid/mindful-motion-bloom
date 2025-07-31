@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Calendar, Trophy, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Flame, Calendar, Trophy, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 
 interface StreakData {
   currentStreak: number;
@@ -23,6 +25,7 @@ export function StreakTracker() {
     lastWorkoutDate: '',
     workoutDates: []
   });
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const savedStreaks = localStorage.getItem('streakData');
@@ -85,97 +88,102 @@ export function StreakTracker() {
   const last30Days = getLast30Days();
 
   return (
-    <div className="space-y-4">
-      {/* Main Streak Card */}
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
       <Card className="shadow-card overflow-hidden">
-        <div className={`h-2 ${streakLevel.color}`}></div>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Flame className="w-5 h-5 mr-2 text-accent" />
-              Streak Tracker
+        <div className={`h-1 ${streakLevel.color}`}></div>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500">
+                <Flame className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">{streakData.currentStreak}</div>
+                <div className="text-xs text-muted-foreground">
+                  day{streakData.currentStreak !== 1 ? 's' : ''} streak
+                </div>
+              </div>
             </div>
-            <Badge className={`${streakLevel.color} text-white border-0`}>
-              {streakLevel.emoji} {streakLevel.level}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Current Streak */}
-          <div className="text-center space-y-2">
-            <div className="text-4xl font-bold text-foreground">
-              {streakData.currentStreak}
+            <div className="flex items-center space-x-2">
+              <Badge className={`${streakLevel.color} text-white border-0 text-xs`}>
+                {streakLevel.emoji} {streakLevel.level}
+              </Badge>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isExpanded ? 
+                    <ChevronUp className="w-4 h-4" /> : 
+                    <ChevronDown className="w-4 h-4" />
+                  }
+                </Button>
+              </CollapsibleTrigger>
             </div>
-            <div className="text-sm text-muted-foreground">
-              Day{streakData.currentStreak !== 1 ? 's' : ''} in a row
+          </div>
+          
+          <CollapsibleContent className="space-y-4 mt-4">
+            {/* Achievement Stats */}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="space-y-1">
+                <Trophy className="w-4 h-4 mx-auto text-accent" />
+                <div className="text-sm font-bold text-foreground">{streakData.longestStreak}</div>
+                <div className="text-xs text-muted-foreground">Best</div>
+              </div>
+              <div className="space-y-1">
+                <TrendingUp className="w-4 h-4 mx-auto text-success" />
+                <div className="text-sm font-bold text-foreground">{streakData.totalWorkouts}</div>
+                <div className="text-xs text-muted-foreground">Total</div>
+              </div>
+              <div className="space-y-1">
+                <Calendar className="w-4 h-4 mx-auto text-primary" />
+                <div className="text-sm font-bold text-foreground">{streakData.weeklyCompleted}/{streakData.weeklyGoal}</div>
+                <div className="text-xs text-muted-foreground">This Week</div>
+              </div>
             </div>
+
+            {/* 30-Day Activity Grid */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-foreground">Last 30 Days</h4>
+              <div className="grid grid-cols-10 gap-1">
+                {last30Days.map((day, index) => (
+                  <div key={day.date} className="flex flex-col items-center space-y-1">
+                    {index % 5 === 0 && (
+                      <div className="text-xs text-muted-foreground h-3">
+                        {day.dayNumber}
+                      </div>
+                    )}
+                    {index % 5 !== 0 && <div className="h-3"></div>}
+                    <div 
+                      className={`w-3 h-3 rounded-sm transition-all ${
+                        day.hasWorkout 
+                          ? 'bg-success shadow-soft' 
+                          : day.isToday 
+                            ? 'bg-muted border-2 border-primary' 
+                            : 'bg-muted'
+                      }`}
+                      title={`${day.date}${day.hasWorkout ? ' - Workout completed!' : ''}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Less</span>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-muted rounded-sm"></div>
+                  <div className="w-2 h-2 bg-success/30 rounded-sm"></div>
+                  <div className="w-2 h-2 bg-success/60 rounded-sm"></div>
+                  <div className="w-2 h-2 bg-success rounded-sm"></div>
+                </div>
+                <span>More</span>
+              </div>
+            </div>
+            
             {streakData.currentStreak > 0 && (
-              <div className="text-xs text-success">
+              <div className="text-center text-xs text-success bg-success/10 rounded-lg p-2">
                 🎉 Keep it up! You're building an amazing habit!
               </div>
             )}
-          </div>
-
-          {/* Achievement Stats */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="space-y-1">
-              <Trophy className="w-5 h-5 mx-auto text-accent" />
-              <div className="text-lg font-bold text-foreground">{streakData.longestStreak}</div>
-              <div className="text-xs text-muted-foreground">Best Streak</div>
-            </div>
-            <div className="space-y-1">
-              <TrendingUp className="w-5 h-5 mx-auto text-success" />
-              <div className="text-lg font-bold text-foreground">{streakData.totalWorkouts}</div>
-              <div className="text-xs text-muted-foreground">Total Workouts</div>
-            </div>
-            <div className="space-y-1">
-              <Calendar className="w-5 h-5 mx-auto text-primary" />
-              <div className="text-lg font-bold text-foreground">{streakData.weeklyCompleted}/{streakData.weeklyGoal}</div>
-              <div className="text-xs text-muted-foreground">This Week</div>
-            </div>
-          </div>
-
-          {/* 30-Day Activity Grid */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-foreground">Last 30 Days</h4>
-            <div className="grid grid-cols-10 gap-1">
-              {last30Days.map((day, index) => (
-                <div key={day.date} className="flex flex-col items-center space-y-1">
-                  {/* Day indicator - only show for every 5th day to avoid clutter */}
-                  {index % 5 === 0 && (
-                    <div className="text-xs text-muted-foreground h-4">
-                      {day.dayNumber}
-                    </div>
-                  )}
-                  {index % 5 !== 0 && <div className="h-4"></div>}
-                  
-                  {/* Activity indicator */}
-                  <div 
-                    className={`w-3 h-3 rounded-sm transition-all ${
-                      day.hasWorkout 
-                        ? 'bg-success shadow-soft' 
-                        : day.isToday 
-                          ? 'bg-muted border-2 border-primary' 
-                          : 'bg-muted'
-                    }`}
-                    title={`${day.date}${day.hasWorkout ? ' - Workout completed!' : ''}`}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Less</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-muted rounded-sm"></div>
-                <div className="w-2 h-2 bg-success/30 rounded-sm"></div>
-                <div className="w-2 h-2 bg-success/60 rounded-sm"></div>
-                <div className="w-2 h-2 bg-success rounded-sm"></div>
-              </div>
-              <span>More</span>
-            </div>
-          </div>
+          </CollapsibleContent>
         </CardContent>
       </Card>
-    </div>
+    </Collapsible>
   );
 }
