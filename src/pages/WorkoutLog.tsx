@@ -330,16 +330,33 @@ export default function WorkoutLog() {
         {/* Workout Home - Show when not in exercise library or templates */}
         {!showExerciseLibrary && !showWorkoutTemplates && !workoutStarted && (
           <div className="space-y-6">
-            {/* Start Workout Section */}
+            {/* Header with quick stats */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-foreground">Start Workout</h2>
+                <p className="text-sm text-muted-foreground">Quick and frictionless</p>
+              </div>
+              <div className="flex space-x-4">
+                <Badge variant="outline" className="text-xs">
+                  {savedWorkouts.length} total workouts
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  {savedWorkouts.reduce((acc, w) => acc + w.duration, 0)}min logged
+                </Badge>
+              </div>
+            </div>
+
+            {/* Main Start Workout Card */}
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 mx-auto bg-gradient-primary rounded-full flex items-center justify-center">
-                  <Dumbbell className="w-8 h-8 text-white" />
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto bg-gradient-primary rounded-full flex items-center justify-center mb-3">
+                    <Play className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">Start Workout</h3>
+                  <p className="text-sm text-muted-foreground">Smart suggestions based on your history</p>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground">Ready to Work Out?</h3>
-                  <p className="text-muted-foreground mt-1">Choose exercises and start your session</p>
-                </div>
+                
                 <div className="space-y-3">
                   <Button 
                     onClick={() => setShowWorkoutTemplates(true)}
@@ -347,38 +364,86 @@ export default function WorkoutLog() {
                     size="lg"
                   >
                     <Dumbbell className="w-5 h-5 mr-2" />
-                    Use Template
+                    Smart Suggestions
                   </Button>
+                  
                   <Button 
-                    onClick={() => setShowExerciseLibrary(true)}
+                    onClick={() => {
+                      // Quick workout with most common exercises (simplified)
+                      const quickExercises = [
+                        { id: '1', name: 'Push-ups', bodyPart: 'Chest', category: 'Strength', equipment: 'Bodyweight', difficulty: 'Beginner' as const, sets: [{ reps: 10, weight: 0, completed: false }] },
+                        { id: '2', name: 'Squats', bodyPart: 'Legs', category: 'Strength', equipment: 'Bodyweight', difficulty: 'Beginner' as const, sets: [{ reps: 10, weight: 0, completed: false }] },
+                        { id: '3', name: 'Plank', bodyPart: 'Core', category: 'Strength', equipment: 'Bodyweight', difficulty: 'Beginner' as const, sets: [{ reps: 30, weight: 0, completed: false }] }
+                      ];
+                      navigate('/workout/session', { state: { exercises: quickExercises } });
+                      toast.success("Quick workout started! 💪");
+                    }}
                     variant="outline"
                     className="w-full"
                     size="lg"
                   >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Build Custom Workout
+                    <Clock className="w-5 h-5 mr-2" />
+                    Quick Workout (15 min)
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setShowExerciseLibrary(true)}
+                    variant="ghost"
+                    className="w-full text-sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Custom workout
                   </Button>
                 </div>
               </div>
             </Card>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{savedWorkouts.length}</div>
-                  <div className="text-sm text-muted-foreground">Total Workouts</div>
+            {/* Recent Workouts */}
+            {savedWorkouts.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-lg font-medium text-foreground flex items-center">
+                  <History className="w-5 h-5 mr-2 text-primary" />
+                  Recent Workouts
+                </h3>
+                <div className="grid gap-3">
+                  {savedWorkouts.slice(0, 3).map((workout) => (
+                    <Card 
+                      key={workout.id} 
+                      className="p-4 cursor-pointer hover:shadow-md transition-all border-l-4 border-l-primary/30"
+                      onClick={() => {
+                        // Restart this workout
+                        navigate('/workout/session', { state: { exercises: workout.exercises } });
+                        toast.success(`Restarting "${workout.name}"! 💪`);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{workout.name}</h4>
+                          <div className="flex items-center space-x-3 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {formatDate(workout.completed_at)}
+                            </span>
+                            <span className="flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {workout.duration}m
+                            </span>
+                            <span className="flex items-center">
+                              <Dumbbell className="w-3 h-3 mr-1" />
+                              {workout.exercises.length} exercises
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getMoodIcon(workout.mood_after)}
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-              <Card className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-accent">
-                    {savedWorkouts.reduce((acc, w) => acc + w.duration, 0)}min
-                  </div>
-                  <div className="text-sm text-muted-foreground">Total Time</div>
-                </div>
-              </Card>
-            </div>
+              </div>
+            )}
           </div>
         )}
 
