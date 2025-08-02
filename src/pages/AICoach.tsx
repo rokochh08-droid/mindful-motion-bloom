@@ -50,6 +50,7 @@ export default function AICoach() {
     }
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -75,11 +76,10 @@ export default function AICoach() {
   ];
 
   const quickQuestions = [
-    "How should I modify my workout if I'm feeling tired?",
-    "I'm losing motivation, can you help?",
-    "What exercises are best for my goals?",
-    "How can I improve my form?",
-    "I missed a few days, how do I get back on track?"
+    "Feeling tired today 😴",
+    "Need motivation 💪",
+    "How's my progress? 📈",
+    "Form check 🎯"
   ];
 
   useEffect(() => {
@@ -98,8 +98,9 @@ export default function AICoach() {
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
+    setIsTyping(true);
 
-    // Simulate AI response
+    // Simulate AI response with typing delay
     setTimeout(async () => {
       const coachResponse = await generateCoachResponse(inputMessage);
       const aiMessage: Message = {
@@ -109,7 +110,8 @@ export default function AICoach() {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
+      setIsTyping(false);
+    }, 1500);
   };
 
   const findBestTrainingResponse = async (userInput: string): Promise<string | null> => {
@@ -233,6 +235,7 @@ export default function AICoach() {
 
   const sendQuickQuestion = (question: string) => {
     setInputMessage(question);
+    setTimeout(() => sendMessage(), 100);
   };
 
   return (
@@ -292,49 +295,71 @@ export default function AICoach() {
 
         {/* Chat Messages */}
         <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-2xl mx-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[80%] rounded-lg p-3 ${
+                <div className={`max-w-[75%] ${
                   message.type === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-card border shadow-soft'
-                }`}>
+                    ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm shadow-soft'
+                    : 'bg-muted/50 text-foreground rounded-2xl rounded-bl-sm shadow-soft border'
+                } px-4 py-3 animate-fade-in`}>
                   {message.type === 'coach' && (
                     <div className="flex items-center space-x-2 mb-2">
-                      <Brain className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-medium text-primary">AI Coach</span>
+                      <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                        <Brain className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                      <span className="text-xs font-medium text-primary">Coach</span>
                     </div>
                   )}
                   <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-2">
+                  <p className={`text-xs mt-2 ${
+                    message.type === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                  }`}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
+            
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-muted/50 text-foreground rounded-2xl rounded-bl-sm shadow-soft border px-4 py-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                      <Brain className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                    <span className="text-xs font-medium text-primary">Coach</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                    <span className="text-xs text-muted-foreground ml-2">typing...</span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
-        {/* Quick Questions */}
-        <div className="p-4 border-t border-border">
-          <div className="text-sm font-medium text-foreground mb-3 flex items-center">
-            <MessageCircle className="w-4 h-4 mr-2 text-primary" />
-            Quick questions
-          </div>
+        {/* Quick Questions - Simplified & Subtle */}
+        <div className="px-4 pb-2">
           <ScrollArea>
-            <div className="flex space-x-2 pb-2">
+            <div className="flex space-x-2 max-w-2xl mx-auto">
               {quickQuestions.map((question, index) => (
                 <Button
                   key={index}
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => sendQuickQuestion(question)}
-                  className="whitespace-nowrap text-xs"
+                  className="whitespace-nowrap text-xs bg-muted/30 hover:bg-muted/50 text-muted-foreground hover:text-foreground border-0 rounded-full h-8 px-3 transition-all hover:scale-105"
                 >
                   {question}
                 </Button>
@@ -344,26 +369,31 @@ export default function AICoach() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-border bg-card">
-          <div className="flex space-x-2">
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask your coach anything..."
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1"
-            />
-            <Button 
-              onClick={sendMessage}
-              disabled={!inputMessage.trim()}
-              className="bg-gradient-primary hover:shadow-glow transition-smooth"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+        <div className="p-4 bg-background border-t border-border">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex space-x-3 items-end">
+              <div className="flex-1 relative">
+                <textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="Message your coach..."
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())}
+                  className="w-full min-h-[72px] max-h-32 resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
+                  rows={3}
+                />
+              </div>
+              <Button 
+                onClick={sendMessage}
+                disabled={!inputMessage.trim() || isTyping}
+                className="bg-gradient-primary hover:shadow-glow transition-all duration-200 h-12 w-12 rounded-full p-0 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                <Send className="w-5 h-5" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              Press Enter to send • Shift+Enter for new line
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Your coach learns from your workouts to give personalized advice
-          </p>
         </div>
       </div>
     </Layout>
