@@ -1,344 +1,273 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Plus, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  TrendingUp,
-  Users,
-  Search,
-  Filter,
-  Trophy,
-  Target,
-  Zap
-} from "lucide-react";
+import { Heart, MessageCircle, Users, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { SharedStruggles } from "@/components/community/SharedStruggles";
+import { AnonymousCheckIn } from "@/components/community/AnonymousCheckIn";
+import { MoodBasedMatching } from "@/components/community/MoodBasedMatching";
+import { GentleCelebration } from "@/components/community/GentleCelebration";
 
-interface Post {
+interface SupportPost {
   id: string;
-  author: string;
-  avatar: string;
   content: string;
-  likes: number;
-  comments: number;
   timeAgo: string;
-  category: string;
-  tags: string[];
+  supportCount: number;
+  commentCount: number;
+  isAnonymous: boolean;
+  struggle: string;
 }
 
-interface Community {
+interface MoodMatch {
+  id: string;
+  count: number;
+  mood: string;
+  energy: string;
+  location: string;
+  message: string;
+  timeframe: string;
+}
+
+interface CelebrationPrompt {
   id: string;
   name: string;
-  description: string;
-  members: number;
-  category: string;
-  icon: React.ReactNode;
-  color: string;
+  achievement: string;
+  needsEncouragement: boolean;
+  timeframe: string;
+  suggestedMessage: string;
 }
 
-const mockPosts: Post[] = [
+const mockSupportPosts: SupportPost[] = [
   {
     id: "1",
-    author: "Sarah M.",
-    avatar: "SM",
-    content: "Just crushed my first 100 push-ups in a single session! Started with barely being able to do 10. The journey has been incredible. For anyone struggling - consistency beats perfection every time! 💪",
-    likes: 47,
-    comments: 12,
+    content: "Monday mornings are so hard for me. I know I should work out but I just feel stuck.",
     timeAgo: "2h ago",
-    category: "Achievement",
-    tags: ["push-ups", "milestone", "motivation"]
-  },
-  {
-    id: "2", 
-    author: "Mike Chen",
-    avatar: "MC",
-    content: "Looking for a workout buddy in downtown Seattle! I usually hit the gym around 6 AM. Anyone interested in some accountability partnership?",
-    likes: 23,
-    comments: 8,
-    timeAgo: "4h ago",
-    category: "Buddy Request",
-    tags: ["seattle", "accountability", "morning-workout"]
-  },
-  {
-    id: "3",
-    author: "Jessica R.",
-    avatar: "JR", 
-    content: "Day 30 of my transformation journey! Progress pics in comments. Still have a long way to go but celebrating every small win. This community keeps me motivated! 🙏",
-    likes: 89,
-    comments: 24,
-    timeAgo: "6h ago",
-    category: "Progress",
-    tags: ["transformation", "30-day-challenge", "progress"]
-  }
-];
-
-const communities: Community[] = [
-  {
-    id: "1",
-    name: "Beginner Friendly",
-    description: "Perfect place to start your fitness journey",
-    members: 2847,
-    category: "Support",
-    icon: <Target className="w-5 h-5" />,
-    color: "bg-blue-500"
+    supportCount: 12,
+    commentCount: 8,
+    isAnonymous: true,
+    struggle: "Monday motivation"
   },
   {
     id: "2",
-    name: "Weight Loss Warriors", 
-    description: "Supporting each other through weight loss goals",
-    members: 1923,
-    category: "Goals",
-    icon: <TrendingUp className="w-5 h-5" />,
-    color: "bg-green-500"
+    content: "Started strong this week but already missing days. Feeling like I'm letting myself down again.",
+    timeAgo: "4h ago", 
+    supportCount: 18,
+    commentCount: 15,
+    isAnonymous: false,
+    struggle: "consistency challenges"
   },
   {
     id: "3",
-    name: "Strength Training",
-    description: "Building muscle and getting stronger together",
-    members: 3654,
-    category: "Training",
-    icon: <Zap className="w-5 h-5" />,
-    color: "bg-orange-500"
+    content: "Comparing myself to others on social media. Know I shouldn't but can't help it.",
+    timeAgo: "6h ago",
+    supportCount: 24,
+    commentCount: 12,
+    isAnonymous: true,
+    struggle: "comparison and self-doubt"
+  }
+];
+
+const mockMoodMatches: MoodMatch[] = [
+  {
+    id: "1",
+    count: 3,
+    mood: "managing",
+    energy: "low",
+    location: "your area",
+    message: "3 others nearby are also feeling low energy today but managing through it",
+    timeframe: "checked in this morning"
   },
   {
-    id: "4",
-    name: "Daily Motivation",
-    description: "Daily doses of inspiration and encouragement",
-    members: 5721,
-    category: "Motivation", 
-    icon: <Trophy className="w-5 h-5" />,
-    color: "bg-purple-500"
+    id: "2", 
+    count: 7,
+    mood: "struggling",
+    energy: "low",
+    location: "within 10 miles",
+    message: "7 people are working through Monday motivation struggles today",
+    timeframe: "active now"
+  }
+];
+
+const mockCelebrationPrompts: CelebrationPrompt[] = [
+  {
+    id: "1",
+    name: "Sarah",
+    achievement: "completed her first week of consistent workouts",
+    needsEncouragement: false,
+    timeframe: "just now",
+    suggestedMessage: "Way to go on your first week! Every day you showed up counts. 🌟"
+  },
+  {
+    id: "2",
+    name: "Mike",
+    achievement: "shared that he's been struggling with motivation",
+    needsEncouragement: true,
+    timeframe: "1h ago",
+    suggestedMessage: "It takes courage to share when things are tough. You're not alone in this. 💙"
+  },
+  {
+    id: "3",
+    name: "Jenny",
+    achievement: "tried a new workout type despite feeling nervous",
+    needsEncouragement: false,
+    timeframe: "3h ago",
+    suggestedMessage: "Stepping outside your comfort zone is so brave. Hope you're proud of yourself! ✨"
   }
 ];
 
 export default function Community() {
-  const [selectedTab, setSelectedTab] = useState("feed");
-  const [newPost, setNewPost] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("support");
+  const [newSupportPost, setNewSupportPost] = useState("");
 
-  const handleCreatePost = () => {
-    if (!newPost.trim()) return;
-    
-    toast.success("Post shared with the community! 🎉");
-    setNewPost("");
+  const handleCheckIn = (mood: string, energy: string) => {
+    toast.success("Thanks for checking in! Your anonymous share helps others feel connected. 💙");
   };
 
-  const filteredPosts = mockPosts.filter(post =>
-    post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const handleShowSupport = (postId: string) => {
+    toast.success("Your support message sent! They'll feel your warmth. 🤗");
+  };
+
+  const handleConnect = (matchId: string) => {
+    toast.success("Support message sent to your mood match! 💫");
+  };
+
+  const handleSendEncouragement = (promptId: string, message?: string) => {
+    toast.success("Your encouragement brightened someone's day! ✨");
+  };
+
+  const handleCreateSupportPost = () => {
+    if (!newSupportPost.trim()) return;
+    
+    toast.success("Your story is shared. Others will feel less alone knowing they're not the only one. 💙");
+    setNewSupportPost("");
+  };
 
   return (
     <Layout>
       <div className="p-4 space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground">Community</h1>
-          <p className="text-muted-foreground">Connect, share, and grow together</p>
+          <p className="text-muted-foreground">Your gentle accountability partners</p>
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="feed" className="flex items-center">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Feed
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="support" className="flex items-center text-xs">
+              <Heart className="w-3 h-3 mr-1" />
+              Support
             </TabsTrigger>
-            <TabsTrigger value="communities" className="flex items-center">
-              <Users className="w-4 h-4 mr-2" />
-              Communities
+            <TabsTrigger value="checkin" className="flex items-center text-xs">
+              <MessageCircle className="w-3 h-3 mr-1" />
+              Check-in
             </TabsTrigger>
-            <TabsTrigger value="trending" className="flex items-center">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Trending
+            <TabsTrigger value="connect" className="flex items-center text-xs">
+              <Users className="w-3 h-3 mr-1" />
+              Connect
+            </TabsTrigger>
+            <TabsTrigger value="celebrate" className="flex items-center text-xs">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Celebrate
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="feed" className="space-y-6 mt-6">
-            {/* Create Post */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      You
-                    </AvatarFallback>
-                  </Avatar>
+          <TabsContent value="support" className="space-y-6 mt-6">
+            {/* Share Support Post */}
+            <Card className="shadow-soft">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-foreground">
+                    Share what you're working through
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Others find comfort knowing they're not alone in their struggles
+                  </p>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1 justify-start text-muted-foreground">
-                        Share your fitness journey...
+                      <Button variant="outline" className="w-full justify-start text-muted-foreground">
+                        "I'm struggling with..." (anonymous)
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Create Post</DialogTitle>
+                        <DialogTitle>Share Your Challenge</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          Your story helps others feel less alone. This will be shared anonymously.
+                        </p>
                         <Textarea
-                          placeholder="What's on your mind? Share your progress, ask for advice, or motivate others..."
-                          value={newPost}
-                          onChange={(e) => setNewPost(e.target.value)}
+                          placeholder="What are you working through right now? Be honest - others will find strength in your vulnerability..."
+                          value={newSupportPost}
+                          onChange={(e) => setNewSupportPost(e.target.value)}
                           rows={4}
                           className="resize-none"
                         />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="anonymous"
-                              checked={isAnonymous}
-                              onChange={(e) => setIsAnonymous(e.target.checked)}
-                              className="rounded"
-                            />
-                            <label htmlFor="anonymous" className="text-sm text-muted-foreground">
-                              Post anonymously
-                            </label>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" onClick={() => setNewPost("")}>
-                              Cancel
-                            </Button>
-                            <Button onClick={handleCreatePost} disabled={!newPost.trim()}>
-                              <Plus className="w-4 h-4 mr-2" />
-                              Share Post
-                            </Button>
-                          </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setNewSupportPost("")}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleCreateSupportPost} disabled={!newSupportPost.trim()}>
+                            <Heart className="w-4 h-4 mr-2" />
+                            Share Anonymously
+                          </Button>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
-              </CardHeader>
+              </CardContent>
             </Card>
 
-            {/* Search and Filter */}
-            <div className="flex space-x-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Search posts, people, tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+            <SharedStruggles 
+              posts={mockSupportPosts} 
+              onShowSupport={handleShowSupport}
+            />
+          </TabsContent>
+
+          <TabsContent value="checkin" className="space-y-6 mt-6">
+            <AnonymousCheckIn onCheckIn={handleCheckIn} />
+            
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-8 h-8 text-primary" />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="w-4 h-4" />
-              </Button>
-            </div>
-
-            {/* Posts Feed */}
-            <div className="space-y-4">
-              {filteredPosts.map((post) => (
-                <Card key={post.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="pt-6">
-                    {/* Post Header */}
-                    <div className="flex items-start space-x-3 mb-4">
-                      <Avatar>
-                        <AvatarFallback className="bg-accent text-accent-foreground">
-                          {post.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-foreground">{post.author}</h4>
-                          <Badge variant="secondary" className="text-xs">
-                            {post.category}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{post.timeAgo}</p>
-                      </div>
-                    </div>
-
-                    {/* Post Content */}
-                    <p className="text-foreground mb-4 leading-relaxed">{post.content}</p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {post.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Post Actions */}
-                    <div className="flex items-center space-x-6 pt-3 border-t">
-                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-500">
-                        <Heart className="w-4 h-4 mr-1" />
-                        {post.likes}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-blue-500">
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        {post.comments}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-green-500">
-                        <Share2 className="w-4 h-4 mr-1" />
-                        Share
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <h3 className="text-lg font-medium text-foreground mb-2">Community Heartbeat</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Today's anonymous check-ins help everyone feel connected
+              </p>
+              <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-500">23</div>
+                  <div className="text-xs text-muted-foreground">Working through challenges</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-500">45</div>
+                  <div className="text-xs text-muted-foreground">Managing today</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-500">18</div>
+                  <div className="text-xs text-muted-foreground">Feeling strong</div>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="communities" className="space-y-6 mt-6">
-            <div className="grid gap-4">
-              {communities.map((community) => (
-                <Card key={community.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center space-x-4">
-                      <div className={`${community.color} p-3 rounded-lg text-white`}>
-                        {community.icon}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">{community.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{community.description}</p>
-                        <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                          <span className="flex items-center">
-                            <Users className="w-3 h-3 mr-1" />
-                            {community.members.toLocaleString()} members
-                          </span>
-                          <Badge variant="outline" className="text-xs">
-                            {community.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button size="sm">
-                        Join
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <TabsContent value="connect" className="space-y-6 mt-6">
+            <MoodBasedMatching 
+              matches={mockMoodMatches}
+              onConnect={handleConnect}
+            />
           </TabsContent>
 
-          <TabsContent value="trending" className="space-y-6 mt-6">
-            <div className="text-center py-12">
-              <TrendingUp className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Trending Topics</h3>
-              <p className="text-muted-foreground">See what's popular in the fitness community</p>
-              
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                {["#30DayChallenge", "#MorningWorkout", "#HealthyRecipes", "#FitnessMotivation"].map((tag) => (
-                  <Badge key={tag} variant="outline" className="py-2 px-3 justify-center">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+          <TabsContent value="celebrate" className="space-y-6 mt-6">
+            <GentleCelebration 
+              prompts={mockCelebrationPrompts}
+              onSendEncouragement={handleSendEncouragement}
+            />
           </TabsContent>
         </Tabs>
       </div>
