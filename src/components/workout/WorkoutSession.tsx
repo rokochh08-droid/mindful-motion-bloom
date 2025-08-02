@@ -104,6 +104,91 @@ export function WorkoutSession({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getLastWorkoutData = (exerciseName: string) => {
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    
+    // Find the most recent workout that contained this exercise
+    for (const workout of savedWorkouts) {
+      const exerciseData = workout.exercises.find((ex: any) => ex.name === exerciseName);
+      if (exerciseData && exerciseData.sets.length > 0) {
+        return exerciseData.sets;
+      }
+    }
+    return null;
+  };
+
+  const getSuggestedValues = (exerciseName: string, currentSet: WorkoutSet, setIndex: number) => {
+    const lastSets = getLastWorkoutData(exerciseName);
+    if (!lastSets || !lastSets[setIndex]) return null;
+    
+    const lastSet = lastSets[setIndex];
+    const suggestedReps = Math.max(1, Math.round(lastSet.reps * 1.05)); // 5% increase
+    const suggestedWeight = Math.max(0, lastSet.weight * 1.05); // 5% increase
+    
+    return {
+      lastReps: lastSet.reps,
+      lastWeight: lastSet.weight,
+      suggestedReps,
+      suggestedWeight
+    };
+  };
+
+  const getProgressIndicator = (exerciseName: string, currentSet: WorkoutSet, setIndex: number) => {
+    const lastSets = getLastWorkoutData(exerciseName);
+    if (!lastSets || !lastSets[setIndex]) return null;
+    
+    const lastSet = lastSets[setIndex];
+    const repsDiff = currentSet.reps - lastSet.reps;
+    const weightDiff = currentSet.weight - lastSet.weight;
+    
+    if (repsDiff > 0 && weightDiff >= 0) {
+      return { type: 'improvement', message: `${repsDiff} more reps than last time! 🔥` };
+    } else if (repsDiff >= 0 && weightDiff > 0) {
+      return { type: 'improvement', message: `+${weightDiff.toFixed(1)}${weightUnit} from last time! 💪` };
+    } else if (repsDiff < 0 || weightDiff < 0) {
+      return { type: 'suggestion', message: 'Consider matching last session?' };
+    }
+    
+    return null;
+  };
+
+  const getSmartSuggestion = (exerciseName: string, currentSet: WorkoutSet, setIndex: number) => {
+    const suggested = getSuggestedValues(exerciseName, currentSet, setIndex);
+    if (!suggested) return null;
+    
+    if (currentSet.reps < suggested.lastReps) {
+      return { type: 'encourage', message: 'Try one more rep? 💪' };
+    } else if (currentSet.weight > suggested.suggestedWeight * 1.1) {
+      return { type: 'caution', message: 'Consider lighter weight for form?' };
+    } else if (currentSet.reps >= suggested.suggestedReps && currentSet.weight >= suggested.suggestedWeight) {
+      return { type: 'celebrate', message: 'New personal best! 🏆' };
+    }
+    
+    return null;
+  };
+
+  const autoFillFromLastSession = (exerciseId: string, setIndex: number) => {
+    const exercise = exercises.find(ex => ex.id === exerciseId);
+    if (!exercise) return;
+    
+    const suggested = getSuggestedValues(exercise.name, exercise.sets[setIndex], setIndex);
+    if (!suggested) return;
+    
+    updateSet(exerciseId, setIndex, 'reps', suggested.suggestedReps);
+    updateSet(exerciseId, setIndex, 'weight', suggested.suggestedWeight);
+    toast.success(`Auto-filled with +5% from last session! 📈`);
+  };
+
+  const copyFromLastSet = (exerciseId: string, setIndex: number) => {
+    const exercise = exercises.find(ex => ex.id === exerciseId);
+    if (!exercise || setIndex === 0) return;
+    
+    const lastSet = exercise.sets[setIndex - 1];
+    updateSet(exerciseId, setIndex, 'reps', lastSet.reps);
+    updateSet(exerciseId, setIndex, 'weight', lastSet.weight);
+    toast.success('Copied from last set! 📋');
+  };
+
   const updateSet = (exerciseId: string, setIndex: number, field: keyof WorkoutSet, value: any) => {
     const updatedExercises = exercises.map(exercise => 
       exercise.id === exerciseId 
@@ -218,7 +303,50 @@ export function WorkoutSession({
           {/* Sets */}
           <div className="space-y-8">
             {exercise.sets.map((set, setIndex) => (
-              <div key={setIndex} className="space-y-8">
+              <div key={setIndex} className="space-y-6">
+                {/* Progress Indicator */}
+                {(() => {
+                  const progressIndicator = getProgressIndicator(exercise.name, set, setIndex);
+                  const smartSuggestion = getSmartSuggestion(exercise.name, set, setIndex);
+                  
+                  return (progressIndicator || smartSuggestion) && !set.completed ? (
+                    <div className="text-center animate-fade-in">
+                      <Badge 
+                        variant={progressIndicator?.type === 'improvement' ? 'default' : 'outline'}
+                        className={`text-xs ${progressIndicator?.type === 'improvement' ? 'bg-success/10 text-success border-success/20' : ''}`}
+                      >
+                        {progressIndicator?.message || smartSuggestion?.message}
+                      </Badge>
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* Quick Fill Buttons */}
+                {!set.completed && (
+                  <div className="flex justify-center gap-2">
+                    {getSuggestedValues(exercise.name, set, setIndex) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => autoFillFromLastSession(exercise.id, setIndex)}
+                        className="text-xs px-3 py-1 h-7 rounded-lg bg-primary/5 hover:bg-primary/10 text-primary"
+                      >
+                        +5% from last
+                      </Button>
+                    )}
+                    {setIndex > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyFromLastSet(exercise.id, setIndex)}
+                        className="text-xs px-3 py-1 h-7 rounded-lg bg-muted/50 hover:bg-muted"
+                      >
+                        Same as last set
+                      </Button>
+                    )}
+                  </div>
+                )}
+
                 {/* Set/Reps/Weight Row */}
                 <div className="flex items-center justify-center gap-12">
                   {/* Set Number */}
