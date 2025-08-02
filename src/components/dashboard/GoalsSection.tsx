@@ -33,6 +33,7 @@ const goalCategories = {
 export function GoalsSection() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
+  const [showAllGoals, setShowAllGoals] = useState(false);
   const [newGoal, setNewGoal] = useState({
     title: '',
     description: '',
@@ -153,6 +154,9 @@ export function GoalsSection() {
     }
   };
 
+  const priorityGoal = goals.find(goal => goal.current < goal.target) || goals[0];
+  const otherGoals = goals.filter(goal => goal.id !== priorityGoal?.id);
+
   return (
     <Card className="shadow-card">
       <CardHeader className="pb-3">
@@ -235,27 +239,24 @@ export function GoalsSection() {
             </Button>
           </div>
         ) : (
-          goals.map((goal) => {
-            const CategoryIcon = goalCategories[goal.category].icon;
-            const progress = getProgressPercentage(goal);
-            const isCompleted = goal.current >= goal.target;
-            
-            return (
-              <div key={goal.id} className="border border-border rounded-lg p-4 transition-smooth hover:shadow-soft">
+          <div className="space-y-4">
+            {/* Priority Goal - Prominently Displayed */}
+            {priorityGoal && (
+              <div className="border-2 border-primary/20 rounded-lg p-4 bg-gradient-calm transition-smooth hover:shadow-soft">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <CategoryIcon className="w-4 h-4 text-primary" />
-                    <h3 className="font-medium text-foreground">{goal.title}</h3>
-                    {isCompleted && <Trophy className="w-4 h-4 text-accent" />}
+                    <Target className="w-4 h-4 text-primary" />
+                    <h3 className="font-medium text-foreground">{priorityGoal.title}</h3>
+                    {priorityGoal.current >= priorityGoal.target && <Trophy className="w-4 h-4 text-accent" />}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge className={getFrequencyBadgeColor(goal.frequency)}>
-                      {goal.frequency}
+                    <Badge className={getFrequencyBadgeColor(priorityGoal.frequency)}>
+                      {priorityGoal.frequency}
                     </Badge>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => deleteGoal(goal.id)}
+                      onClick={() => deleteGoal(priorityGoal.id)}
                       className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -263,70 +264,121 @@ export function GoalsSection() {
                   </div>
                 </div>
                 
-                {goal.description && (
-                  <p className="text-sm text-muted-foreground mb-3">{goal.description}</p>
+                {priorityGoal.description && (
+                  <p className="text-sm text-muted-foreground mb-3">{priorityGoal.description}</p>
                 )}
                 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Progress</span>
                     <span className="text-sm font-medium">
-                      {goal.current}/{goal.target} {goalCategories[goal.category].unit}
+                      {priorityGoal.current}/{priorityGoal.target} {goalCategories[priorityGoal.category].unit}
                     </span>
                   </div>
-                  <Progress value={progress} className="h-2" />
+                  <Progress value={getProgressPercentage(priorityGoal)} className="h-3" />
                 </div>
                 
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex space-x-2">
-                    {!isCompleted && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateGoalProgress(goal.id, 1)}
-                          className="text-xs hover:bg-success/10 hover:border-success transition-smooth"
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          +1
-                        </Button>
-                        {goal.target > 10 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateGoalProgress(goal.id, 5)}
-                            className="text-xs hover:bg-success/10 hover:border-success transition-smooth"
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            +5
-                          </Button>
-                        )}
-                      </>
+                    {priorityGoal.current < priorityGoal.target && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateGoalProgress(priorityGoal.id, 1)}
+                        className="text-xs hover:bg-success/10 hover:border-success transition-smooth"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        +1
+                      </Button>
                     )}
                   </div>
                   
-                  {/* Quick Complete Button */}
-                  {!isCompleted && goal.current < goal.target && (
+                  {priorityGoal.current < priorityGoal.target ? (
                     <Button
                       size="sm"
-                      onClick={() => updateGoalProgress(goal.id, goal.target - goal.current)}
-                      className="bg-success hover:bg-success/80 text-white text-xs h-8 px-3 hover:scale-105 transition-all duration-200 shadow-soft hover:shadow-glow"
+                      onClick={() => updateGoalProgress(priorityGoal.id, priorityGoal.target - priorityGoal.current)}
+                      className="bg-success hover:bg-success/80 text-white text-xs h-8 px-4 hover:scale-105 transition-all duration-200 shadow-soft hover:shadow-glow"
                     >
-                      <Check className="w-3 h-3 mr-1" />
-                      Complete
+                      <Check className="w-4 h-4 mr-1" />
+                      Complete Goal
                     </Button>
-                  )}
-                  
-                  {isCompleted && (
-                    <div className="flex items-center text-success text-xs font-medium">
+                  ) : (
+                    <div className="flex items-center text-success text-sm font-medium">
                       <Trophy className="w-4 h-4 mr-1" />
                       Completed!
                     </div>
                   )}
                 </div>
               </div>
-            );
-          })
+            )}
+
+            {/* Other Goals - Collapsed/Smaller */}
+            {otherGoals.length > 0 && (
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllGoals(!showAllGoals)}
+                  className="text-muted-foreground hover:text-foreground text-xs"
+                >
+                  {showAllGoals ? 'Show Less' : `View ${otherGoals.length} More Goal${otherGoals.length > 1 ? 's' : ''}`}
+                  <Plus className={`w-3 h-3 ml-1 transition-transform ${showAllGoals ? 'rotate-45' : ''}`} />
+                </Button>
+
+                {showAllGoals && (
+                  <div className="space-y-2">
+                    {otherGoals.map((goal) => {
+                      const CategoryIcon = goalCategories[goal.category].icon;
+                      const progress = getProgressPercentage(goal);
+                      const isCompleted = goal.current >= goal.target;
+                      
+                      return (
+                        <div key={goal.id} className="border border-border rounded-lg p-3 transition-smooth hover:shadow-soft">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <CategoryIcon className="w-3 h-3 text-primary" />
+                              <h4 className="text-sm font-medium text-foreground">{goal.title}</h4>
+                              {isCompleted && <Trophy className="w-3 h-3 text-accent" />}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs text-muted-foreground">
+                                {goal.current}/{goal.target}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteGoal(goal.id)}
+                                className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="w-2 h-2" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Progress value={progress} className="h-1 flex-1 mr-3" />
+                            {!isCompleted ? (
+                              <Button
+                                size="sm"
+                                onClick={() => updateGoalProgress(goal.id, goal.target - goal.current)}
+                                className="bg-success hover:bg-success/80 text-white text-xs h-6 px-2"
+                              >
+                                <Check className="w-3 h-3" />
+                              </Button>
+                            ) : (
+                              <div className="text-success text-xs">
+                                <Trophy className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

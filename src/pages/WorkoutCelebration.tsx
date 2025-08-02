@@ -14,6 +14,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
+import { MotivationalCard } from "@/components/dashboard/MotivationalCard";
 
 interface WorkoutData {
   name: string;
@@ -168,8 +169,13 @@ export default function WorkoutCelebration() {
             </Card>
           </div>
 
+          {/* Motivational Quote - Now appears after workout */}
+          <div className={`transform transition-all duration-1000 delay-1200 ${showStats ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+            <MotivationalCard />
+          </div>
+
           {/* Action Buttons */}
-          <div className={`space-y-4 transform transition-all duration-1000 delay-1000 ${showStats ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+          <div className={`space-y-4 transform transition-all duration-1000 delay-1400 ${showStats ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
             <Button
               onClick={handleContinue}
               className="w-full h-14 text-lg bg-gradient-to-r from-success to-primary text-white hover:from-success/90 hover:to-primary/90 rounded-2xl shadow-lg"

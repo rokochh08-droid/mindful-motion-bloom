@@ -97,32 +97,6 @@ export default function Dashboard() {
         {/* Goals Section */}
         <GoalsSection />
 
-        {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="shadow-card hover:shadow-soft transition-smooth">
-            <CardContent className="p-4 text-center">
-              <Activity className="w-6 h-6 mx-auto mb-2 text-success" />
-              <div className="text-lg font-bold text-foreground">{stats.weeklyWorkouts}</div>
-              <div className="text-xs text-muted-foreground">This Week</div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card hover:shadow-soft transition-smooth">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary" />
-              <div className="text-lg font-bold text-foreground">+15%</div>
-              <div className="text-xs text-muted-foreground">Strength Up</div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card hover:shadow-soft transition-smooth">
-            <CardContent className="p-4 text-center">
-              <Trophy className="w-6 h-6 mx-auto mb-2 text-accent" />
-              <div className="text-lg font-bold text-foreground">92%</div>
-              <div className="text-xs text-muted-foreground">Consistency</div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Mood & Energy */}
         <Card className="shadow-card">
@@ -154,30 +128,27 @@ export default function Dashboard() {
         </Card>
 
 
-        {/* Motivational Card */}
-        <MotivationalCard />
 
-        {/* AI Coach Insight */}
-        <Card className="shadow-card bg-gradient-calm border-0">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center shadow-soft">
-                <Brain className="w-5 h-5 text-primary-foreground" />
+        {/* AI Coach Insight - Smaller & Less Prominent */}
+        <Card className="shadow-card bg-muted/30 border-muted">
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                <Brain className="w-3 h-3 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-foreground mb-1">AI Coach Insight</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Your consistency is impressive! Based on your progress, I recommend adding 
-                  some mobility work to enhance recovery and prevent injury.
+                <p className="text-xs text-muted-foreground">
+                  Your consistency is great! Consider adding mobility work.
                 </p>
-                <Button 
-                  size="sm" 
-                  onClick={() => navigate('/coach')}
-                  className="bg-primary hover:bg-primary-dark transition-smooth"
-                >
-                  Get Personalized Plan
-                </Button>
               </div>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={() => navigate('/coach')}
+                className="text-xs text-primary hover:text-primary-dark h-6 px-2"
+              >
+                AI Coach
+              </Button>
             </div>
           </CardContent>
         </Card>
