@@ -16,14 +16,28 @@ interface FeelingCheckInProps {
 
 export function FeelingCheckIn({ onMoodUpdate }: FeelingCheckInProps) {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const handleMoodSelect = (mood: number) => {
     setSelectedMood(mood);
-    onMoodUpdate(mood);
+    setIsExiting(true);
+    
+    // Start exit animation, then hide completely
+    setTimeout(() => {
+      onMoodUpdate(mood);
+      setIsVisible(false);
+    }, 500); // Match animation duration
   };
 
+  if (!isVisible) return null;
+
   return (
-    <Card className="shadow-card bg-card/50 backdrop-blur-sm">
+    <Card className={`shadow-card bg-card/50 backdrop-blur-sm transition-all duration-500 ${
+      isExiting 
+        ? 'animate-fade-out transform -translate-y-4 scale-95 opacity-0' 
+        : 'animate-fade-in'
+    }`}>
       <CardContent className="p-4">
         <h3 className="text-sm font-medium text-foreground mb-3 text-center">
           How are you feeling right now?
